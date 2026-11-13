@@ -1,0 +1,29 @@
+name: build index
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "[0-9][0-9][0-9][0-9]/**"
+      - "scripts/build_index.py"
+
+permissions:
+  contents: write
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/build_index.py
+      - name: commit README if changed
+        run: |
+          git diff --quiet README.md && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: README 인덱스 갱신"
+          git push
