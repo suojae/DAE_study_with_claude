@@ -61,9 +61,9 @@ flowchart LR
 
 - [ ] SOUL.md를 역할만 남게 줄인다 (AS-IS·TO-BE 조건을 같게)
 - [ ] **재배포 전** 새 대화에서 `어제 일별 활성 사용자 수 알려줘` → `images/01-asis-chat.png`
-- [ ] AS-IS 서버 소개 글 → `images/03-asis-instructions.png`
+- [x] AS-IS 서버 소개 글 → `images/03-asis-instructions.png`
 - [ ] PR 머지·재배포
 - [ ] 같은 질문 → `images/02-tobe-chat.png`
-- [ ] TO-BE 서버 소개 글 → `images/04-tobe-instructions.png`
+- [ ] TO-BE 서버 소개 글 → 실제 응답을 `images/04-tobe-instructions.json`(`{"instructions","list_metrics"}`)으로 저장 후 `python3 render_instructions.py images/04-tobe-instructions.json TO-BE images/04-tobe-instructions.png`
 - [ ] 🔒 프롬프트의 사용자@호스트·IP·이메일·사내 도메인 가리기 (`export PS1='$ '`)
 - [ ] 두 캡처의 창 크기·글자 크기 맞추기
