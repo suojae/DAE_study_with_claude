@@ -25,9 +25,9 @@
 
 ```mermaid
 flowchart LR
-    P["❓ 어제 DAU?"] --> A{"서버 소개만 보고<br/>DAU가 여기 있는지<br/>알 수 있나?"}
-    A -- "AS-IS ❌" --> X["되물음"]
-    A -- "TO-BE ✅" --> Y["list_metrics → query"]
+    P["어제 DAU?"] --> A{"서버 소개만 보고<br/>DAU가 여기 있는지<br/>알 수 있나?"}
+    A -- "AS-IS" --> X["되물음"]
+    A -- "TO-BE" --> Y["list_metrics → query"]
 ```
 
 | 단계 | 내용 |
@@ -57,7 +57,7 @@ flowchart LR
 
 ---
 
-## 📸 촬영 체크리스트 (다 찍으면 이 섹션 삭제)
+## 촬영 체크리스트 (다 찍으면 이 섹션 삭제)
 
 - [ ] SOUL.md를 역할만 남게 줄인다 (AS-IS·TO-BE 조건을 같게)
 - [ ] **재배포 전** 새 대화에서 `어제 일별 활성 사용자 수 알려줘` → `images/01-asis-chat.png`
@@ -65,5 +65,5 @@ flowchart LR
 - [ ] PR 머지·재배포
 - [ ] 같은 질문 → `images/02-tobe-chat.png`
 - [ ] TO-BE 서버 소개 글 → 실제 응답을 `images/04-tobe-instructions.json`(`{"instructions","list_metrics"}`)으로 저장 후 `python3 render_instructions.py images/04-tobe-instructions.json TO-BE images/04-tobe-instructions.png`
-- [ ] 🔒 프롬프트의 사용자@호스트·IP·이메일·사내 도메인 가리기 (`export PS1='$ '`)
+- [ ] 프롬프트의 사용자@호스트·IP·이메일·사내 도메인 가리기 (`export PS1='$ '`)
 - [ ] 두 캡처의 창 크기·글자 크기 맞추기

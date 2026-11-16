@@ -35,9 +35,9 @@ def block(text: str) -> str:
 def page(data: dict, label: str) -> str:
     has_scope = SCOPE_MARK in data["instructions"]
     badge = (
-        '<span class="badge ok">✅ 다루는 데이터 목록 있음</span>'
+        '<span class="badge ok">다루는 데이터 목록 있음</span>'
         if has_scope
-        else '<span class="badge no">❌ 다루는 데이터 목록 없음</span>'
+        else '<span class="badge no">다루는 데이터 목록 없음</span>'
     )
     return f"""<!doctype html><meta charset="utf-8"><style>
 body {{ margin:0; background:#fff; font-family:-apple-system,"Apple SD Gothic Neo",sans-serif; color:#1f2328; }}

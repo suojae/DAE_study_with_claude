@@ -11,7 +11,7 @@ tags: [mcp, hermes-agent, oauth, troubleshooting, llm-agent]
 
 ```mermaid
 flowchart LR
-    U["👤 Slack 사용자"] --> H["🤖 Hermes Agent<br/>원격 리눅스 서버"]
+    U["Slack 사용자"] --> H["Hermes Agent<br/>원격 리눅스 서버"]
     H -- "모델 호출" --> C["Codex 구독<br/>openai-codex"]
     H -- "MCP · OAuth" --> M["사내 MCP 서버<br/>list_metrics · query"]
     M --> CUBE["Cube<br/>지표 정의"] --> BQ[("BigQuery<br/>mart")]
@@ -26,7 +26,7 @@ flowchart LR
 | 3 | `/mcp` → `Unknown command` | 로그인은 채팅 명령이 아니라 CLI 명령 | `hermes mcp login <server>` |
 | 4 | 로그인 후 브라우저 `연결할 수 없음` | 콜백이 원격 서버의 `127.0.0.1`로 감 | 주소창 URL을 원격 터미널에 붙여넣기 |
 | 5 | 배너에 `Nous Research` 표시 | 만든 곳 표시일 뿐 | `hermes config`로 provider 확인 |
-| 6 ⭐ | 지표를 물었는데 MCP 도구를 안 씀 | 서버 설명에 **데이터 범위**가 없음 | 서버 설명 보강, SOUL.md는 역할만 |
+| 6 (핵심) | 지표를 물었는데 MCP 도구를 안 씀 | 서버 설명에 **데이터 범위**가 없음 | 서버 설명 보강, SOUL.md는 역할만 |
 
 ---
 
@@ -34,21 +34,21 @@ flowchart LR
 
 ```mermaid
 sequenceDiagram
-    participant R as 🖥️ 원격 서버 (Hermes)
+    participant R as 원격 서버 (Hermes)
     participant O as OpenAI
-    participant B as 💻 맥북 브라우저
+    participant B as 맥북 브라우저
     R->>O: 기기 코드 요청
     O-->>R: 코드 발급
-    Note over R: Waiting for sign-in... ⏳<br/>(멈춘 게 아님)
+    Note over R: Waiting for sign-in...<br/>(멈춘 게 아님)
     B->>O: 로그인 + 코드 입력 + 승인
     R->>O: 승인됐나? (폴링)
-    O-->>R: ✅ 토큰
+    O-->>R: 토큰
 ```
 
 | 포인트 | |
 |---|---|
-| 💡 | 로그인하는 기기 ≠ 코드 받는 기기여도 됨 → **포트 포워딩 불필요** |
-| ⚠️ | 코드는 10~15분 뒤 만료 → `Ctrl+C` 후 재시작 |
+| 팁 | 로그인하는 기기 ≠ 코드 받는 기기여도 됨 → **포트 포워딩 불필요** |
+| 주의 | 코드는 10~15분 뒤 만료 → `Ctrl+C` 후 재시작 |
 
 ## 2. 가져온 MCP 설정에 인증 누락
 
@@ -61,12 +61,12 @@ sequenceDiagram
 
 | 포인트 | |
 |---|---|
-| 💡 | 마법사가 "성공"이라 해도 **파일을 열어 확인** |
-| ⚠️ | 들여쓰기는 공백, `url`과 같은 깊이 (탭 ❌) |
+| 팁 | 마법사가 "성공"이라 해도 **파일을 열어 확인** |
+| 주의 | 들여쓰기는 공백, `url`과 같은 깊이 (탭 금지) |
 
 ## 3. MCP 로그인 명령
 
-| ❌ 시도 | ✅ 정답 |
+| 틀린 시도 | 정답 |
 |---|---|
 | 채팅에서 `/mcp` | `hermes mcp login <server>` |
 | | `hermes mcp test <server>` (연결·도구 확인) |
@@ -77,26 +77,26 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant R as 🖥️ 원격 서버 (Hermes)
-    participant B as 💻 맥북 브라우저
+    participant R as 원격 서버 (Hermes)
+    participant B as 맥북 브라우저
     participant S as MCP 서버
     R->>R: hermes mcp login → 로그인 URL 출력
     R-->>B: (사람이) URL 복사
     B->>S: 로그인 (Google)
     S-->>B: 127.0.0.1:포트/callback?code=...
-    Note over B: ❌ 연결할 수 없음<br/>→ 정상! 맥북엔 리스너가 없음
+    Note over B: 연결할 수 없음<br/>→ 정상! 맥북엔 리스너가 없음
     B-->>R: (사람이) 주소창 URL 붙여넣기
     R->>S: code 교환
-    S-->>R: ✅ 토큰 저장
+    S-->>R: 토큰 저장
 ```
 
 | 방법 | 장점 | 명령 |
 |---|---|---|
-| **붙여넣기** ⭐ | 준비 없음 | 에러 페이지 주소창 URL → 원격 터미널 |
+| **붙여넣기** (추천) | 준비 없음 | 에러 페이지 주소창 URL → 원격 터미널 |
 | SSH 포트 포워딩 | 리다이렉트가 자동으로 도착 | `ssh -N -L <포트>:127.0.0.1:<포트> <user>@<host>` |
 | `--flow device` | 브라우저 리다이렉트 없음 | MCP 서버가 기기 코드를 지원해야 함 |
 
-| ⚠️ 주의 | |
+| 주의 | |
 |---|---|
 | `^[[B^[[A` | 화살표 키 잔여물 → 붙여넣기 전 `Ctrl+U` |
 | `code` | 일회용이지만 계정 정보 포함 → **원격 터미널에만** 붙이기 |
@@ -105,21 +105,21 @@ sequenceDiagram
 
 ```bash
 hermes config | grep -iE 'provider|model'
-# provider: openai-codex ✅
+# provider: openai-codex
 ```
 
 > 교훈: **화면 문구 < 설정값**
 
-## 6. ⭐ 봇이 MCP 도구를 안 씀
+## 6. (핵심) 봇이 MCP 도구를 안 씀
 
 ### 무슨 일이 있었나
 
 ```mermaid
 flowchart LR
-    Q["❓ 어제 DAU 알려줘"] --> A["🤖 Hermes"]
+    Q["어제 DAU 알려줘"] --> A["Hermes"]
     A -. "안 부름" .-> M["list_metrics"]
     A --> SK["skill 목록 훑기"]
-    SK --> R["🙋 어떤 데이터 소스요?<br/>GA4? Amplitude?"]
+    SK --> R["어떤 데이터 소스요?<br/>GA4? Amplitude?"]
 ```
 
 ### 원인 추적
@@ -127,21 +127,21 @@ flowchart LR
 ```mermaid
 flowchart TD
     S["MCP 서버 설명<br/>'지표 조회 도구다'"] --> X{"DAU가 여기<br/>있다는 걸 알 수 있나?"}
-    X -- "❌ 데이터 범위가 안 적혀 있음" --> N["도구를 안 부름"]
+    X -- "데이터 범위가 안 적혀 있음" --> N["도구를 안 부름"]
     N --> D["Cube 지표 정의<br/>(아무리 좋아도 안 읽힘)"]
-    X -- "✅ 범위가 적혀 있으면" --> Y["list_metrics 호출<br/>→ Cube 정의 읽음 → query"]
+    X -- "범위가 적혀 있으면" --> Y["list_metrics 호출<br/>→ Cube 정의 읽음 → query"]
 ```
 
-### 🏫 비유
+### 비유
 
 | 실제 | 비유 |
 |---|---|
-| MCP 서버 | 🚪 자료실 — 문에 "자료실" 팻말만 |
-| Cube 지표 정의 | 📚 자료실 안의 책 |
-| 서버 지침 | 📋 자료실 이용 수칙 |
-| Hermes | 🧑‍💼 새 직원 — DAU가 거기 있는지 몰라 안 들어감 |
+| MCP 서버 | 자료실 — 문에 "자료실" 팻말만 |
+| Cube 지표 정의 | 자료실 안의 책 |
+| 서버 지침 | 자료실 이용 수칙 |
+| Hermes | 새 직원 — DAU가 거기 있는지 몰라 안 들어감 |
 
-### ❌ 처음 대응 → ✅ 수정
+### 처음 대응 → 수정
 
 | | 처음 (잘못) | 수정 |
 |---|---|---|
@@ -149,7 +149,7 @@ flowchart TD
 | 문제 | 서버 지침과 **중복** → 이미 문구가 어긋남 | |
 | 서버 설명 | 그대로 | **다루는 데이터 범위 추가** |
 
-### 📍 정보는 어디에
+### 정보는 어디에
 
 ```mermaid
 flowchart TB
@@ -189,13 +189,13 @@ flowchart TB
 
 | | 역할 | 비유 |
 |---|---|---|
-| Cube | 어떤 지표가 있는지 앎 (cube·measure 제목) | 📚 소장 목록 |
-| MCP 서버 | Cube에 물어 소개 글에 옮겨 적음 | ✍️ 팻말 쓰는 사람 |
-| 팻말 | `instructions` + `list_metrics` 설명 | 🪧 문 앞 안내판 |
+| Cube | 어떤 지표가 있는지 앎 (cube·measure 제목) | 소장 목록 |
+| MCP 서버 | Cube에 물어 소개 글에 옮겨 적음 | 팻말 쓰는 사람 |
+| 팻말 | `instructions` + `list_metrics` 설명 | 문 앞 안내판 |
 
 ```mermaid
 sequenceDiagram
-    participant H as 🤖 Hermes
+    participant H as Hermes
     participant M as MCP 서버
     participant C as Cube
     H->>M: initialize / tools/list
@@ -210,11 +210,11 @@ sequenceDiagram
 
 | 포인트 | |
 |---|---|
-| ✅ 자동 생성 | 코드에 손으로 적으면 Cube 지표가 바뀔 때마다 낡음 → 매번 `/meta`에서 읽음 |
-| ✅ 이름만 | 지표 **정의**(`description`)는 팻말에 안 넣음 → `list_metrics` 안에서 읽힘 (길이·중복 방지) |
-| ✅ 두 군데 | `instructions`를 무시하는 클라이언트도 있음 → 도구 설명에도 같은 목록 |
-| ⚠️ 장애 시 | Cube가 죽으면 목록 없이 예전 소개 + 경고 로그 (서버는 계속 응답) |
-| ⚠️ 비용 | 연결마다 `/meta` 1회 추가, 타임아웃 없음 → Cube가 느리면 연결도 느림 |
+| 자동 생성 | 코드에 손으로 적으면 Cube 지표가 바뀔 때마다 낡음 → 매번 `/meta`에서 읽음 |
+| 이름만 | 지표 **정의**(`description`)는 팻말에 안 넣음 → `list_metrics` 안에서 읽힘 (길이·중복 방지) |
+| 두 군데 | `instructions`를 무시하는 클라이언트도 있음 → 도구 설명에도 같은 목록 |
+| 장애 시 | Cube가 죽으면 목록 없이 예전 소개 + 경고 로그 (서버는 계속 응답) |
+| 비용 | 연결마다 `/meta` 1회 추가, 타임아웃 없음 → Cube가 느리면 연결도 느림 |
 
 > 교훈: MCP 서버의 "자기소개"는 규약에 정해진 두 칸(`instructions`, 도구 `description`)뿐. 봇이 알아야 할 건 **여기에** 적어야 닿는다
 
