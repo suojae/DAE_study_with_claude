@@ -1,6 +1,6 @@
 ---
 date: 2026-11-16
-tags: [mcp, hermes-agent, oauth, troubleshooting, llm-agent]
+tags: [mcp, hermes-agent, oauth, troubleshooting, llm-agent, data-mart, semantic-layer]
 ---
 
 # Hermes Agent로 지표 조회 봇 붙이기 — 트러블슈팅
@@ -16,6 +16,22 @@ flowchart LR
     H -- "MCP · OAuth" --> M["사내 MCP 서버<br/>list_metrics · query"]
     M --> CUBE["Cube<br/>지표 정의"] --> BQ[("BigQuery<br/>mart")]
 ```
+
+## 레이어 구조 — 질문에서 원천 데이터까지
+
+![깨우는 쪽부터 원천 데이터까지 레이어 구조](images/16-mcp-data-mart-layers.png)
+
+| 레이어 | 하는 일 | 한 줄 |
+|---|---|---|
+| 깨우는 쪽 | 일을 시작시킴 | 사람·타이머·앱 무엇이든 호스트를 깨울 뿐 |
+| 호스트 | LLM이 판단, MCP 클라이언트가 포장·전송 | 도구를 부를지 말지는 LLM이 정함 |
+| MCP 규격 | 서버와 대화하는 공통 문법 | 연결 때 `initialize`·`tools/list` 1번, 질문마다 `tools/call` |
+| MCP 서버 | 도구와 그 설명을 내놓음 | 같은 Cube 위에 공개 범위만 다른 서버를 여러 개 둘 수 있음 |
+| Cube | 지표 정의(시맨틱 레이어) | view로 묶어 노출, cube는 마트 테이블마다 하나 |
+| dbt 데이터마트 | 원천을 지표 재료로 정리 | staging → intermediate → mart(fct·dim) |
+| 원천 데이터 | 실제 기록 | RDB·GA4를 Airflow·ECS로 BigQuery raw에 적재 |
+
+> 위로 갈수록 "무엇을 물을지", 아래로 갈수록 "무엇이 사실인지"를 다룬다. 지표 정의는 Cube 한 곳에만 둔다
 
 ## 한눈에 보기
 
