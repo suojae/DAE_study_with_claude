@@ -7,19 +7,9 @@
 
 봇에게 "어제 DAU"를 물으면 **지표 서버를 두고도 "어떤 데이터 소스요?"라고 되물었다.** 원인은 봇이 아니라 서버의 자기소개에 **다루는 데이터 범위**가 없던 것이었다. 서버가 Cube 메타데이터에서 범위를 읽어 자기소개에 싣게 바꿨다.
 
-## AS-IS / TO-BE
+## AS-IS 서버 소개 글 원문
 
-| AS-IS | TO-BE |
-|---|---|
-| _캡처 예정_ | _캡처 예정_ |
-| 도구를 부르지 않고 데이터 소스를 되물음 | `list_metrics` → `query` 호출 후 숫자로 답함 |
-
-### 왜 달라졌나 — 봇이 받는 서버 소개 글
-
-| AS-IS | TO-BE |
-|---|---|
-| ![AS-IS 소개 글](images/03-asis-instructions.png) | _재배포 후 생성 예정_ |
-| "지표 조회 도구다" + 조회 규칙뿐 | 맨 앞에 `다루는 데이터 — 방문: 유저 수, …` 목록 |
+![AS-IS 소개 글](images/03-asis-instructions.png)
 
 ## 문제 → 원인 → 해결
 
@@ -50,18 +40,3 @@
 
 - 단위·통합 테스트 추가 10개, 변경 3개 (전체 970개 통과)
 - 결정 기록(ADR) 작성
-- 효과: _재배포 후 TO-BE 캡처와 함께 기록_
-
----
-
-## 촬영 체크리스트 (다 찍으면 이 섹션 삭제)
-
-- [ ] SOUL.md를 역할만 남게 줄인다 (AS-IS·TO-BE 조건을 같게)
-- [ ] **재배포 전** 새 대화에서 `어제 일별 활성 사용자 수 알려줘` → `images/01-asis-chat.png`
-- [x] AS-IS 서버 소개 글 → `images/03-asis-instructions.png`
-- [ ] PR 머지·재배포
-- [ ] 같은 질문 → `images/02-tobe-chat.png`
-- [ ] TO-BE 서버 소개 글 → 실제 응답을 `images/04-tobe-instructions.json`(`{"instructions","list_metrics"}`)으로 저장 후 `python3 render_instructions.py images/04-tobe-instructions.json TO-BE images/04-tobe-instructions.png`
-- [ ] 프롬프트의 사용자@호스트·IP·이메일·사내 도메인 가리기 (`export PS1='$ '`)
-- [ ] 두 캡처의 창 크기·글자 크기 맞추기
-- [ ] 위 표의 `_캡처 예정_`·`_재배포 후 생성 예정_` 칸을 이미지 링크로 바꾸기 (`![AS-IS 대화](images/01-asis-chat.png)` 형식)
