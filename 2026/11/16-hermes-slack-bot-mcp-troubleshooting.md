@@ -253,5 +253,5 @@ sequenceDiagram
 
 - [ ] SOUL.md 줄인 뒤 재시험 → 답에 measure 이름·기간(from~to) 나오는지
 - [x] MCP 서버 설명에 데이터 범위 추가 (사내 repo PR 올림 — `list_metrics` 설명 한 곳으로 수정, 머지·재배포 대기)
-- [ ] Slack 앱 생성 → 토큰 등록 → Slack은 MCP만 남기기
+- [x] Slack 앱 생성 → 토큰 등록 → Slack은 MCP만 남기기 ([다음 노트](16-mcp-deploy-and-slack-bot.md))
 - [ ] 개인 계정 → 봇 전용 계정 전환 여부 결정
