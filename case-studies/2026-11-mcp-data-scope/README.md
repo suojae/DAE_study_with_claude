@@ -11,14 +11,14 @@
 
 | AS-IS | TO-BE |
 |---|---|
-| ![AS-IS 대화](images/01-asis-chat.png) | ![TO-BE 대화](images/02-tobe-chat.png) |
+| _캡처 예정_ | _캡처 예정_ |
 | 도구를 부르지 않고 데이터 소스를 되물음 | `list_metrics` → `query` 호출 후 숫자로 답함 |
 
 ### 왜 달라졌나 — 봇이 받는 서버 소개 글
 
 | AS-IS | TO-BE |
 |---|---|
-| ![AS-IS 소개 글](images/03-asis-instructions.png) | ![TO-BE 소개 글](images/04-tobe-instructions.png) |
+| ![AS-IS 소개 글](images/03-asis-instructions.png) | _재배포 후 생성 예정_ |
 | "지표 조회 도구다" + 조회 규칙뿐 | 맨 앞에 `다루는 데이터 — 방문: 유저 수, …` 목록 |
 
 ## 문제 → 원인 → 해결
@@ -67,3 +67,4 @@ flowchart LR
 - [ ] TO-BE 서버 소개 글 → 실제 응답을 `images/04-tobe-instructions.json`(`{"instructions","list_metrics"}`)으로 저장 후 `python3 render_instructions.py images/04-tobe-instructions.json TO-BE images/04-tobe-instructions.png`
 - [ ] 프롬프트의 사용자@호스트·IP·이메일·사내 도메인 가리기 (`export PS1='$ '`)
 - [ ] 두 캡처의 창 크기·글자 크기 맞추기
+- [ ] 위 표의 `_캡처 예정_`·`_재배포 후 생성 예정_` 칸을 이미지 링크로 바꾸기 (`![AS-IS 대화](images/01-asis-chat.png)` 형식)
