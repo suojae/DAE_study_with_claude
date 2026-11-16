@@ -195,18 +195,18 @@ flowchart TB
 |---|---|---|
 | Cube | 어떤 지표가 있는지 앎 (cube·measure 제목) | 소장 목록 |
 | MCP 서버 | Cube에 물어 소개 글에 옮겨 적음 | 팻말 쓰는 사람 |
-| 팻말 | `instructions` + `list_metrics` 설명 | 문 앞 안내판 |
+| 팻말 | `list_metrics` 설명 | 문 앞 안내판 |
 
 ```mermaid
 sequenceDiagram
     participant H as Hermes
     participant M as MCP 서버
     participant C as Cube
-    H->>M: initialize / tools/list
+    H->>M: tools/list
     M->>C: /meta (어떤 지표 있어?)
     C-->>M: cube·measure 제목
-    Note over M: 목록 + 기존 지침 조립
-    M-->>H: instructions / description
+    Note over M: 기존 설명 + 목록 조립
+    M-->>H: list_metrics description
     Note over H: "DAU 여기 있네" → list_metrics 호출
 ```
 
@@ -216,9 +216,9 @@ sequenceDiagram
 |---|---|
 | 자동 생성 | 코드에 손으로 적으면 Cube 지표가 바뀔 때마다 낡음 → 매번 `/meta`에서 읽음 |
 | 이름만 | 지표 **정의**(`description`)는 팻말에 안 넣음 → `list_metrics` 안에서 읽힘 (길이·중복 방지) |
-| 두 군데 | `instructions`를 무시하는 클라이언트도 있음 → 도구 설명에도 같은 목록 |
+| 한 곳만 | 도구 설명은 모든 클라이언트가 넘김, `instructions`는 안 넘기는 클라이언트도 있음 → 도구 설명에만. 두 곳이면 목록 중복 + Cube 2회 |
 | 장애 시 | Cube가 죽으면 목록 없이 예전 소개 + 경고 로그 (서버는 계속 응답) |
-| 비용 | 연결마다 `/meta` 1회 추가, 타임아웃 없음 → Cube가 느리면 연결도 느림 |
+| 비용 | `tools/list`마다 `/meta` 1회 추가, 타임아웃 없음 → Cube가 느리면 도구 목록도 느림 |
 
 > 교훈: MCP 서버의 "자기소개"는 규약에 정해진 두 칸(`instructions`, 도구 `description`)뿐. 봇이 알아야 할 건 **여기에** 적어야 닿는다
 
