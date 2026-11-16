@@ -169,21 +169,9 @@ flowchart TB
 
 ### 팻말 자리는 MCP 규약에 이미 있다
 
-| 대화 | 봇이 묻는 것 | 서버 답의 팻말 칸 | 봇(클라이언트)이 넣는 곳 |
-|---|---|---|---|
-| `initialize` | "너 누구야?" | `instructions` | LLM 시스템 프롬프트 |
-| `tools/list` | "무슨 도구 있어?" | 도구별 `description` | LLM 도구 정의 |
+![연결 시점과 질문 시점의 요청 순서](../../case-studies/2026-11-mcp-data-scope/images/05-gate-sequence.png)
 
-```json
-// initialize 응답
-{ "result": { "serverInfo": { "name": "semantic" },
-    "instructions": "다루는 데이터(cube: measure) — ...\n- 방문: 유저 수, 회원 수, 방문 수\n\n지표는 measure로만 ..." } }
-
-// tools/list 응답
-{ "result": { "tools": [
-    { "name": "list_metrics", "description": "조회 가능한 지표 목록 ...\n다루는 데이터 — 방문: 유저 수, ..." },
-    { "name": "query", "description": "..." } ] } }
-```
+![AS-IS·TO-BE 봇이 판단할 때 보는 텍스트](../../case-studies/2026-11-mcp-data-scope/images/06-gate-text.png)
 
 ### 누가 무엇을 하나
 

@@ -23,12 +23,9 @@
 
 ## 문제 → 원인 → 해결
 
-```mermaid
-flowchart LR
-    P["어제 DAU?"] --> A{"서버 소개만 보고<br/>DAU가 여기 있는지<br/>알 수 있나?"}
-    A -- "AS-IS" --> X["되물음"]
-    A -- "TO-BE" --> Y["list_metrics → query"]
-```
+![연결 시점과 질문 시점의 요청 순서](images/05-gate-sequence.png)
+
+![AS-IS·TO-BE 봇이 판단할 때 보는 텍스트](images/06-gate-text.png)
 
 | 단계 | 내용 |
 |---|---|
