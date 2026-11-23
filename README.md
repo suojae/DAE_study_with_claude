@@ -6,7 +6,7 @@
 
 ## 최근 노트
 
-- 2026-11-23 [데이터가 있어도 숫자가 안 나오는 이유 — 지표 정의의 함정 5개](2026/11/23-metric-definition-pitfalls.md)
+- 2026-11-23 [숫자 하나 내는데 왜 이렇게 오래 걸렸나 — 지표 정의에서 걸린 함정 5개](2026/11/23-metric-definition-pitfalls.md)
 - 2026-11-18 [데이터 오류 감시는 두 층 — Airflow는 "돌았나", Elementary는 "맞나"](2026/11/18-data-quality-monitoring.md)
 - 2026-11-17 [SQL 실행 순서 — 쓰는 순서와 도는 순서는 다르다](2026/11/17-sql-execution-order.md)
 - 2026-11-17 [데이터 마트 층 구조 — raw · staging · intermediate · mart(fct · dim · rpt)](2026/11/17-data-mart-layers.md)
@@ -20,7 +20,7 @@
 
 ### dbt
 
-- 2026-11-23 [데이터가 있어도 숫자가 안 나오는 이유 — 지표 정의의 함정 5개](2026/11/23-metric-definition-pitfalls.md)
+- 2026-11-23 [숫자 하나 내는데 왜 이렇게 오래 걸렸나 — 지표 정의에서 걸린 함정 5개](2026/11/23-metric-definition-pitfalls.md)
 - 2026-11-18 [데이터 오류 감시는 두 층 — Airflow는 "돌았나", Elementary는 "맞나"](2026/11/18-data-quality-monitoring.md)
 - 2026-11-17 [데이터 마트 층 구조 — raw · staging · intermediate · mart(fct · dim · rpt)](2026/11/17-data-mart-layers.md)
 - 2026-11-16 [MCP 서버 배포 흐름과 Slack 봇 공개까지](2026/11/16-mcp-deploy-and-slack-bot.md)
@@ -28,7 +28,7 @@
 
 ### data-mart
 
-- 2026-11-23 [데이터가 있어도 숫자가 안 나오는 이유 — 지표 정의의 함정 5개](2026/11/23-metric-definition-pitfalls.md)
+- 2026-11-23 [숫자 하나 내는데 왜 이렇게 오래 걸렸나 — 지표 정의에서 걸린 함정 5개](2026/11/23-metric-definition-pitfalls.md)
 - 2026-11-17 [데이터 마트 층 구조 — raw · staging · intermediate · mart(fct · dim · rpt)](2026/11/17-data-mart-layers.md)
 - 2026-11-16 [Hermes Agent로 지표 조회 봇 붙이기 — 트러블슈팅](2026/11/16-hermes-slack-bot-mcp-troubleshooting.md)
 
@@ -45,12 +45,12 @@
 
 ### data-quality
 
-- 2026-11-23 [데이터가 있어도 숫자가 안 나오는 이유 — 지표 정의의 함정 5개](2026/11/23-metric-definition-pitfalls.md)
+- 2026-11-23 [숫자 하나 내는데 왜 이렇게 오래 걸렸나 — 지표 정의에서 걸린 함정 5개](2026/11/23-metric-definition-pitfalls.md)
 - 2026-11-18 [데이터 오류 감시는 두 층 — Airflow는 "돌았나", Elementary는 "맞나"](2026/11/18-data-quality-monitoring.md)
 
 ### dimensional-modeling
 
-- 2026-11-23 [데이터가 있어도 숫자가 안 나오는 이유 — 지표 정의의 함정 5개](2026/11/23-metric-definition-pitfalls.md)
+- 2026-11-23 [숫자 하나 내는데 왜 이렇게 오래 걸렸나 — 지표 정의에서 걸린 함정 5개](2026/11/23-metric-definition-pitfalls.md)
 - 2026-11-17 [데이터 마트 층 구조 — raw · staging · intermediate · mart(fct · dim · rpt)](2026/11/17-data-mart-layers.md)
 
 ### hermes-agent
@@ -85,7 +85,7 @@
 
 ### metric-definition
 
-- 2026-11-23 [데이터가 있어도 숫자가 안 나오는 이유 — 지표 정의의 함정 5개](2026/11/23-metric-definition-pitfalls.md)
+- 2026-11-23 [숫자 하나 내는데 왜 이렇게 오래 걸렸나 — 지표 정의에서 걸린 함정 5개](2026/11/23-metric-definition-pitfalls.md)
 
 ### monitoring
 
@@ -109,7 +109,7 @@
 
 ### retention
 
-- 2026-11-23 [데이터가 있어도 숫자가 안 나오는 이유 — 지표 정의의 함정 5개](2026/11/23-metric-definition-pitfalls.md)
+- 2026-11-23 [숫자 하나 내는데 왜 이렇게 오래 걸렸나 — 지표 정의에서 걸린 함정 5개](2026/11/23-metric-definition-pitfalls.md)
 
 ### security
 
