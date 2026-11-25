@@ -62,6 +62,8 @@ def build(notes: list[dict]) -> str:
         "",
         f"노트 {len(notes)}개 · 태그 {len(tags)}개",
         "",
+        "> 매일 푸는 RDB · DW 모델링 연습문제: [drills/](drills/README.md)",
+        "",
         "## 최근 노트",
         "",
     ]

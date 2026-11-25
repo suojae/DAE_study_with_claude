@@ -4,6 +4,8 @@
 
 노트 8개 · 태그 28개
 
+> 매일 푸는 RDB · DW 모델링 연습문제: [drills/](drills/README.md)
+
 ## 최근 노트
 
 - 2026-11-24 [데이터 모델링 기초 — 관계 · 엔티티 계층 · 속성 제약 (14~18강)](2026/11/24-data-modeling-fundamentals-14-18.md)
