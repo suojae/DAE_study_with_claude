@@ -19,7 +19,7 @@
 
 ## 게임 모드
 
-[`game.html`](game.html)을 브라우저로 열면 같은 문제를 게임처럼 풀 수 있다. (GitHub 화면에서는 HTML이 실행되지 않으니 clone 후 로컬에서 열기)
+[`game.html`](game.html)을 브라우저로 열면 같은 문제를 게임처럼 풀 수 있다. 바로 플레이: **https://suojae.github.io/DAE_study_with_claude/** (`main`에 `game.html`이 바뀌면 GitHub Actions가 자동 배포)
 
 - 한 판 = 브리핑 → 퀴즈 5~7문제(객관식 · 분류 · 계산 · 버그 찾기) → **보스전**(직접 설계 후 모범 답안 체크리스트로 대조)
 - 목숨은 PK 열쇠 3개, 남은 열쇠 = 별 개수. 연속 정답 콤보 XP, 레벨
