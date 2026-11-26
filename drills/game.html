@@ -140,6 +140,52 @@ code,.mono{font-family:var(--f-mono)}
 .code button:disabled{cursor:default}
 .hint{font-size:13px;color:var(--muted);margin-top:8px}
 .submitbar{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center}
+/* 문제 시각화 */
+.vis{display:grid;gap:10px;margin:0 0 14px;min-width:0}
+.vis>div{min-width:0}
+#card{min-width:0}
+.vcap{font-family:var(--f-mono);font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--muted);margin:0 0 4px;text-transform:none}
+.vtb{overflow-x:auto;border:2px solid var(--line);border-radius:6px}
+.vtb table{border-collapse:collapse;width:100%;font-size:13px;font-family:var(--f-mono)}
+.vtb th{background:var(--grid);color:var(--ink);text-align:left;font-weight:600;padding:5px 9px;white-space:nowrap;border-bottom:2px solid var(--line)}
+.vtb td{padding:5px 9px;border-top:1px solid var(--line);white-space:nowrap}
+.vtb td.bad{background:var(--bad-soft);color:var(--bad);font-weight:600}
+.vtb td.hl{background:color-mix(in srgb,var(--accent) 12%,var(--card));color:var(--accent);font-weight:600}
+.vtb td.ok{background:var(--ok-soft);color:var(--ok)}
+.vtb td.mute{color:var(--muted);text-decoration:line-through}
+.verd{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.vent{border:2px solid var(--ink);border-radius:5px;background:var(--card);min-width:118px;font-family:var(--f-mono);font-size:12px;overflow:hidden}
+.vent b{display:block;background:var(--ink);color:var(--card);padding:3px 8px;font-size:12px}
+.vent span{display:flex;justify-content:space-between;gap:8px;padding:2px 8px;border-top:1px dashed var(--line)}
+.vent span:first-of-type{border-top:0}
+.vent span.slot{color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--card));font-weight:600}
+.vent i{font-style:normal;font-size:10px;font-weight:600;border-radius:3px;padding:0 4px;align-self:center}
+.vent i.pk{background:var(--gold);color:#16233B} .vent i.fk{background:var(--grid);color:var(--muted);border:1px solid var(--line)}
+.vpair{display:flex;align-items:center;gap:6px}
+.vlink{font-family:var(--f-mono);font-size:11px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:2px;white-space:nowrap}
+.vlink::before,.vlink::after{content:"";width:10px;height:2px;background:var(--line)}
+.vtl{list-style:none;margin:0;padding:0 0 0 4px;border-left:3px solid var(--line)}
+.vtl li{position:relative;padding:3px 0 3px 14px;font-size:14px}
+.vtl li::before{content:"";position:absolute;left:-8px;top:10px;width:11px;height:11px;border-radius:50%;background:var(--card);border:2.5px solid var(--accent)}
+.vtl li b{font-family:var(--f-mono);font-size:12px;display:inline-block;min-width:74px;color:var(--accent)}
+.vtl li.hl{font-weight:700}
+.vfl{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.vfl span{border:2px solid var(--ink);border-radius:999px;padding:2px 11px;font-size:13px;font-weight:600;background:var(--card)}
+.vfl span.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.vfl em{font-style:normal;color:var(--muted);font-weight:700}
+.vfacts{display:grid;gap:5px;margin:0;padding:0;list-style:none}
+.vfacts li{border:1.5px solid var(--line);border-radius:6px;padding:6px 10px;font-size:14px;background:var(--card);display:flex;gap:8px}
+.vfacts li::before{content:"▸";color:var(--accent);font-weight:700}
+.vfacts code{font-size:.9em;background:var(--grid);padding:1px 5px;border-radius:3px}
+.vvs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vvs>div{border:2px solid var(--line);border-radius:6px;overflow:hidden}
+.vvs h4{margin:0;padding:5px 10px;background:var(--grid);font-size:13px}
+.vvs ul{margin:0;padding:6px 10px 8px 26px;font-size:13.5px;line-height:1.55}
+@media (max-width:520px){.vvs{grid-template-columns:1fr}}
+.scnbox{margin:0 0 12px;font-size:13.5px;color:var(--muted)}
+.scnbox summary{cursor:pointer;font-family:var(--f-mono);font-size:12px;font-weight:600}
+.scnbox p{margin:6px 0 0;padding:8px 10px;border-left:3px solid var(--line);color:var(--ink)}
+.q{font-weight:500} .q b{font-weight:800;color:var(--accent)}
 /* 단계별 힌트 */
 .hints{margin-top:16px;border-top:1px dashed var(--line);padding-top:12px}
 .hintbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -625,6 +671,227 @@ dw07:[
 };
 STAGES.forEach(s => s.qs.forEach((q,i) => { q.h = (HINTS[s.id]||[])[i] || []; }));
 
+/* ───────────── 문제 시각화 (스테이지 id → 문제 순서대로 {q, v}) ─────────────
+   q: 짧게 다시 쓴 질문(HTML 가능). v: 그림 하나 또는 배열.
+   그림 종류
+     {t:"tb", cap, h:[열], r:[[칸]]}        샘플 데이터 표. 칸 앞에 ! = 문제(빨강), * = 강조(파랑), + = 정상(초록), ~ = 흐리게
+     {t:"erd", e:[{n, c:[컬럼]}], l:[관계]}  미니 ERD. 컬럼 "x PK"/"x FK" 배지, "?" = 빈 칸. l은 이웃 박스 사이 라벨
+     {t:"tl", cap, ev:[[언제, 무엇]]}         타임라인
+     {t:"fl", cap, s:[단계]}                  흐름도 (단계 앞 ! = 문제)
+     {t:"facts", cap, i:[문장]}               주어진 조건
+     {t:"vs", a:{h, b:[줄]}, b:{h, b:[줄]}}  두 안 비교 */
+const VIS = {
+rdb01:[
+ {q:"같은 제목이 두 줄이다. <b>엔티티를 어떻게 나눌까?</b>",
+  v:{t:"tb",cap:"원천 샘플 (서가에 꽂힌 책)",h:["등록번호","ISBN","제목","출판사"],
+     r:[["B-0001","*978-11-1","*데이터 모델링 입문","*한빛"],["B-0002","*978-11-1","*데이터 모델링 입문","*한빛"],["B-0003","978-22-2","SQL 첫걸음","길벗"]]}},
+ {q:"속성 6개를 <b>알맞은 테이블</b>에 넣어라.",
+  v:{t:"erd",e:[{n:"member",c:["member_id PK","?"]},{n:"loan",c:["loan_id PK","member_id FK","copy_id FK","?"]},{n:"book_copy",c:["copy_id PK","isbn FK","?"]},{n:"book",c:["isbn PK","title","?"]},{n:"book_author",c:["isbn FK","author_id FK","?"]}],
+     l:["1 : N","N : 1","N : 1","1 : N"]}},
+ {q:"<b>3번 행만</b> 막고 1·2번 행은 허용하려면?",
+  v:{t:"tb",cap:"loan (권 B-0001의 대출 이력)",h:["loan_id","copy_id","member_id","returned_at"],
+     r:[["1","B-0001","민수","+2026-03-10 반납"],["2","B-0001","지영","*NULL (대출 중)"],["3","B-0001","민수","!NULL ← 들어오면 안 됨"]]}},
+ {q:"이 DDL에서 <b>규칙을 어기는 줄</b>을 모두 골라라.",
+  v:{t:"facts",cap:"지켜야 할 규칙",i:["같은 책(ISBN)이 여러 권 있다","저자는 여러 명일 수 있고, 저자별로 검색해야 한다","반납하면 같은 권을 누구든(같은 사람도) 다시 빌릴 수 있다"]}},
+ {q:"민수가 <b>6번째</b> 대출을 시도한다. 무엇으로 막을까?",
+  v:{t:"tb",cap:"민수의 미반납 대출",h:["#","copy_id","returned_at"],
+     r:[["1","B-0001","NULL"],["2","B-0007","NULL"],["3","B-0012","NULL"],["4","B-0020","NULL"],["5","B-0031","NULL"],["6","!B-0099","!새로 INSERT?"]]}}
+],
+rdb02:[
+ {q:"'1반'이 세 번 나온다. <b>분반은 어떤 엔티티</b>일까?",
+  v:{t:"tb",cap:"section 샘플",h:["학기","과목","분반 번호","강사"],
+     r:[["2026-1","MATH1","*1","김"],["2026-1","MATH1","2","이"],["2026-1","ENG1","*1","박"],["2026-2","MATH1","*1","김"]]}},
+ {q:"분반을 <b>유일하게</b> 가리키는 컬럼 조합은?",
+  v:[{t:"facts",cap:"번호 매기는 규칙",i:["분반 번호는 과목마다 1부터","학기가 바뀌면 다시 1부터"]},
+     {t:"tb",cap:"과목+번호만 쓰면?",h:["학기","과목","분반 번호"],r:[["2026-1","!MATH1","!1"],["2026-2","!MATH1","!1"]]}]},
+ {q:"(A) 방식: 분반 키를 그대로 FK로. enrollment의 <b>PK는 컬럼 몇 개?</b>",
+  v:{t:"erd",e:[{n:"section",c:["term PK","course_code PK","section_no PK"]},{n:"enrollment",c:["? PK …","student_id FK"]},{n:"student",c:["student_id PK"]}],l:["1 : N","N : 1"]}},
+ {q:"분반 아래로 자식 테이블이 계속 생긴다. <b>어떻게 설계할까?</b>",
+  v:{t:"vs",a:{h:"(A) 복합 키를 계속 물려받기",b:["enrollment PK = term, course_code, section_no, student_id","attendance PK = 위 4개 + session_no","assignment PK = 위 4개 + assignment_no","JOIN 조건도 4~5줄씩"]},
+     b:{h:"(B) section_id 대리키",b:["section PK = section_id","enrollment PK = enrollment_id","attendance PK = enrollment_id, session_no","그럼 '같은 학기·과목에 1반 둘'은 누가 막지?"]}}},
+ {q:"수강생이 있는 분반을 DELETE 하면? <b>ON DELETE 정책</b>을 골라라.",
+  v:[{t:"tb",cap:"enrollment (MATH1-2반)",h:["student","grade"],r:[["민수","A"],["지영","B+"],["철수","NULL (진행 중)"]]},
+     {t:"facts",i:["성적은 졸업 후에도 조회돼야 한다"]}]}
+],
+rdb03:[
+ {q:"이 중 <b>재귀</b>(양쪽이 같은 엔티티) 관계는 몇 개?",
+  v:{t:"facts",cap:"시나리오 속 관계 5개",i:["직원 → 직속 상사 (직원)","부서 → 상위 부서 (부서)","직원 → 소속 부서","부서 → 부서장 (직원)","멘토 (직원) ↔ 멘티 (직원), 시작·종료일"]}},
+ {q:"관계 5개를 <b>FK 컬럼 하나</b>와 <b>연결 테이블</b>로 나눠라.",
+  v:{t:"erd",e:[{n:"employee",c:["employee_id PK","manager_id ?","department_id ?"]},{n:"department",c:["department_id PK","parent_id ?","head_employee_id ?"]},{n:"mentoring ?",c:["?","started_on","ended_on"]}],l:["N : 1 / 1 : 1","M : N ?"]}},
+ {q:"이 행만 보고 <b>누가 멘토</b>인지 알 수 있을까? 더 좋은 컬럼 이름은?",
+  v:{t:"tb",cap:"mentoring",h:["employee_id_1","employee_id_2","started_on"],r:[["*101","*205","2026-03-01"]]}},
+ {q:"소속과 부서장을 <b>is_head 하나</b>로 합치면?",
+  v:[{t:"tb",cap:"employee",h:["이름","department_id","is_head"],r:[["김본부","D1","true"],["이팀장","D2","true"],["박과장","D2","!true ← 실수로 하나 더"],["최사원","D2","false"]]},
+     {t:"facts",i:["이팀장이 D1 부서장 대행까지 맡게 되면?"]}]},
+ {q:"이 <b>순환</b>을 CHECK가 막을까?",
+  v:[{t:"tb",cap:"employee",h:["employee_id","manager_id"],r:[["A","!B"],["B","!A"]]},
+     {t:"facts",i:["걸린 제약: <code>CHECK (manager_id &lt;&gt; employee_id)</code>"]}]}
+],
+rdb04:[
+ {q:"속성 6개를 <b>알맞은 테이블</b>에 넣어라.",
+  v:{t:"erd",e:[{n:"app_user",c:["user_id PK","?"]},{n:"room_member",c:["room_id FK","user_id FK","?"]},{n:"room",c:["room_id PK","?"]}],l:["1 : N","N : 1"]}},
+ {q:"R1 멤버가 아닌 철수의 메시지를 <b>INSERT 단계에서</b> 막으려면?",
+  v:[{t:"tb",cap:"room_member",h:["room_id","user_id"],r:[["R1","민수"],["R1","지영"]]},
+     {t:"tb",cap:"message (새로 들어오는 행)",h:["room_id","sender_id","text"],r:[["R1","민수","+안녕"],["R1","!철수","!나 몰래 들어옴"]]}]},
+ {q:"'메시지 × 사용자'마다 읽음 행을 만들면 <b>몇 행?</b>",
+  v:{t:"facts",cap:"조건",i:["방 멤버 1,000명","메시지 10,000개","읽음 테이블: (message_id, user_id) 1행씩"]}},
+ {q:"민수가 방을 나간다. <b>room_member 행</b>은 어떻게 할까?",
+  v:[{t:"tb",cap:"room_member",h:["room_id","user_id","joined_at","left_at"],r:[["R1","민수","3/1","*?"]]},
+     {t:"tb",cap:"message — (room_id, sender_id)가 room_member를 참조",h:["id","room_id","sender_id","sent_at"],r:[["m7","R1","*민수","3/5"]]}]},
+ {q:"이 DDL에서 <b>규칙을 어기는 줄</b>을 모두 골라라.",
+  v:{t:"facts",cap:"지켜야 할 규칙",i:["방 멤버만 메시지를 보낸다","멤버마다 역할·알림 설정이 다르다","답장(reply_to)이 가능하다"]}}
+],
+rdb05:[
+ {q:"예약을 2항 관계 두 개로 쪼개면? <b>김환자는 몇 호에서</b> 진료받았나?",
+  v:[{t:"tb",cap:"원래 예약",h:["시각","의사","진료실","환자"],r:[["09:00","이의사","101호","김환자"],["10:00","이의사","102호","최환자"]]},
+     {t:"vs",a:{h:"(의사, 진료실)",b:["이의사 – 101호","이의사 – 102호"]},b:{h:"(의사, 환자)",b:["이의사 – 김환자","이의사 – 최환자"]}}]},
+ {q:"<code>UNIQUE (doctor_id, start_at)</code>가 <b>09:30 예약</b>을 막을까?",
+  v:{t:"tb",cap:"appointment",h:["doctor","start_at","end_at"],r:[["이의사","09:00","10:00 (초진 60분)"],["이의사","!09:30 ← 새 예약","!10:00"]]}},
+ {q:"<b>겹침 방지</b>로 맞는 것은?",
+  v:{t:"facts",cap:"조건",i:["의사·진료실·환자 각각 시간이 겹치면 안 된다","취소된 예약은 겹침 검사에서 빠진다","같은 순간에 예약 요청 두 건이 들어올 수 있다"]}},
+ {q:"A와 B는 <b>겹칠까?</b>",
+  v:[{t:"tb",h:["예약","구간"],r:[["A","[09:00, 10:00)"],["B","[10:00, 10:30)"]]},
+     {t:"facts",i:["<code>[</code> = 그 시각 포함, <code>)</code> = 그 시각 미포함"]}]},
+ {q:"진단은 <b>어디에</b> 붙일까?",
+  v:{t:"tb",cap:"김환자의 진료 기록",h:["예약","날짜","진단"],r:[["A1","3/2","J00 감기"],["A2","4/9","*J02 인두염, J00 감기"]]}}
+],
+rdb06:[
+ {q:"(C) 종류별 테이블만 둔다. <b>payment의 FK</b>는 어디를 가리키지?",
+  v:{t:"erd",e:[{n:"payment",c:["payment_id PK","payment_method_id FK → ?"]},{n:"card_method",c:["id PK","card_token"]},{n:"account_method",c:["id PK","bank"]},{n:"easy_pay_method",c:["id PK","provider"]}],l:["→ ?","",""]}},
+ {q:"2번은 허용, 3·4번도 허용. <b>기본 수단 2개</b>만 막으려면?",
+  v:{t:"tb",cap:"payment_method (민수)",h:["id","is_default","deleted_at"],r:[["1","true","~2026-05-01 (삭제됨)"],["2","+true","NULL ← 새 기본, 허용"],["3","false","NULL"],["4","false","NULL"],["5","!true","!NULL ← 막아야 함"]]}},
+ {q:"우리 DB에는 <b>무엇을 저장</b>할까?",
+  v:{t:"tb",cap:"카드 등록 화면에서 받는 값",h:["항목","예시"],r:[["카드번호","1234-5678-9012-3456"],["PG가 돌려준 토큰","tok_8f2a…"],["끝 4자리","3456"]]}},
+ {q:"계좌 부모에 <b>카드 정보</b>가 붙는 걸 DB로 막으려면?",
+  v:[{t:"tb",cap:"payment_method (부모)",h:["id","method_type"],r:[["10","*account"]]},
+     {t:"tb",cap:"card_method (자식)",h:["method_id","card_token"],r:[["!10","!tok_… ← 계좌에 카드가?"]]}]},
+ {q:"결제 수단을 지워도 <b>과거 결제 p1</b>이 남게 하려면?",
+  v:[{t:"tb",cap:"payment",h:["id","payment_method_id","금액","날짜"],r:[["p1","*3","30,000","2026-02-11"]]},
+     {t:"facts",i:["민수가 결제 수단 3번을 삭제한다"]}]}
+],
+rdb07:[
+ {q:"order_item엔 menu_id만 있다. 지금 3월 주문을 열면 <b>얼마로 보일까?</b>",
+  v:{t:"tl",ev:[["3/1","아메리카노 4,000원에 주문"],["6/1","사장님이 5,000원으로 인상"],["오늘","3월 주문 상세를 연다 → ?"]]}},
+ {q:"주문 쪽 컬럼 6개를 <b>분류</b>하라.",
+  v:{t:"facts",cap:"원칙",i:["원본(menu, customer)은 언제든 바뀐다","주문서는 주문한 그 순간 모습 그대로여야 한다","분석하려면 원본과의 연결도 필요하다"]}},
+ {q:"각 테이블을 <b>개념과 짝지어라</b>.",
+  v:[{t:"erd",e:[{n:"order_status_history",c:["order_id FK","status","changed_at"]},{n:"customer_order",c:["order_id PK"]},{n:"order_item",c:["order_id FK","menu_id FK","quantity","unit_price"]}],l:["N : 1","1 : N"]},
+     {t:"erd",e:[{n:"review",c:["review_id PK"]},{n:"owner_reply",c:["review_id PK·FK","text"]}],l:["1 : 0..1"]},
+     {t:"erd",e:[{n:"review",c:["review_id PK"]},{n:"review_photo",c:["review_id FK","url"]}],l:["1 : N"]}]},
+ {q:"주문 하나에 리뷰는 <b>최대 하나</b>. DB로 강제하려면?",
+  v:{t:"erd",e:[{n:"customer_order",c:["order_id PK","status"]},{n:"review",c:["review_id PK","order_id FK ?","rating"]}],l:["1 : 0..1"]}},
+ {q:"'맛 선택: <b>정확히 1개</b>'는 어떻게 지킬까?",
+  v:[{t:"tb",cap:"option_group",h:["이름","min_select","max_select"],r:[["맛 선택","1","1"]]},
+     {t:"tb",cap:"order_item_option (주문 1줄의 선택)",h:["order_item","option"],r:[["line-1","바닐라"],["line-1","!초코 ← 두 번째?"]]}]}
+],
+dw01:[
+ {q:"팩트 테이블 <b>한 행 = ?</b>",
+  v:[{t:"tb",cap:"영수증 R-1001 · 강남점 · 14:32",h:["상품","카테고리","수량","금액","행사"],r:[["삼각김밥","식품","2","2,400","1+1"],["콜라","음료","1","1,800","—"],["껌","과자","1","1,000","—"]]},
+     {t:"facts",cap:"현업 질문",i:["점포별·일별 매출총이익","카테고리별 시간대 판매량","1+1 행사 효과","객단가"]}]},
+ {q:"POS 컬럼 7개를 <b>팩트 · 차원 · degenerate</b>로 나눠라.",
+  v:{t:"facts",cap:"구분 기준",i:["팩트 = 더하거나 계산하는 숫자","차원 = 'OO별로' 자르는 기준 (속성이 따로 있음)","degenerate = 기준이긴 한데 붙일 속성이 없는 번호"]}},
+ {q:"두 점포 값을 <b>더해도 말이 되는</b> 지표는?",
+  v:{t:"tb",h:["지표","강남점","역삼점"],r:[["수량","10","5"],["결제 금액","12,000","6,000"],["원가 금액","8,400","4,800"],["정가(단가)","1,200","1,200"],["이익률","30%","20%"]]}},
+ {q:"(1)처럼 날짜 차원에 시:분까지 넣으면 <b>1년에 몇 행?</b>",
+  v:{t:"vs",a:{h:"(1) dim_date 하나",b:["2026-11-26 14:32","2026-11-26 14:33","… 분마다 1행"]},b:{h:"(2) 둘로 나누기",b:["dim_date: 날짜 1행씩","dim_time: 하루 1,440분 1행씩"]}}},
+ {q:"행사 없는 판매(2번 줄)의 <b>promotion_key</b>는?",
+  v:[{t:"tb",cap:"fct_pos_line",h:["line","promotion_key","금액"],r:[["1","7","2,400"],["2","*?","1,800"]]},
+     {t:"tb",cap:"dim_promotion",h:["promotion_key","이름"],r:[["7","1+1"],["8","2+1"]]}]},
+ {q:"객단가 = <b>영수증 한 장당</b> 평균 금액. 맞는 SQL은?",
+  v:{t:"tb",cap:"fct_pos_line — 영수증 2장, 라인 4줄",h:["receipt_no","상품","net_amount"],r:[["*R1","삼각김밥","2,400"],["*R1","콜라","1,800"],["*R1","껌","1,000"],["R2","도시락","5,000"]]}},
+ {q:"grain과 <b>맞지 않거나 저장하면 안 되는</b> 줄을 골라라.",
+  v:{t:"facts",cap:"이 팩트의 grain",i:["한 행 = 영수증의 상품 한 줄"]}}
+],
+dw02:[
+ {q:"요일은 함수로 나오는데 <b>날짜 차원을 따로</b> 만드는 진짜 이유는?",
+  v:[{t:"vs",a:{h:"리포트 A",b:["주말 = 토·일","주말 비중 28%"]},b:{h:"리포트 B",b:["주말 = 금·토·일","주말 비중 41%"]}},
+     {t:"facts",i:["설 연휴 날짜는 매년 바뀐다","회계연도는 3월에 시작한다"]}]},
+ {q:"2027-02-16은 <b>몇 회계연도 몇 분기</b>?",
+  v:{t:"tl",cap:"FY2026",ev:[["2026-03-01","FY2026 시작"],["…","분기마다 3개월"],["2027-02-28","FY2026 끝"]]}},
+ {q:"현업 질문마다 필요한 <b>dim_date 컬럼</b>을 짝지어라.",
+  v:{t:"tb",cap:"dim_date 한 행 (2026-11-28 토요일)",h:["컬럼","값"],r:[["is_weekend","true"],["holiday_name","NULL"],["fiscal_quarter","FQ3"],["days_after_payday","3"],["iso_week","2026-W48"]]}},
+ {q:"날짜 FK가 세 개. <b>날짜 차원은 어떻게?</b>",
+  v:{t:"erd",e:[{n:"fct_order_line",c:["order_date_key FK","paid_date_key FK","delivered_date_key FK"]},{n:"dim_date",c:["date_key PK","is_weekend","holiday_name"]}],l:["N : 1 × 3"]}},
+ {q:"아직 배송 중인 O-2의 <b>delivered_date_key</b>는?",
+  v:{t:"tb",cap:"fct_order_line",h:["order","order_date_key","delivered_date_key"],r:[["O-1","20261120","20261123"],["O-2","20261125","*? (배송 중)"]]}}
+],
+dw03:[
+ {q:"숫자 측정값이 없다. <b>이 테이블은 무엇?</b>",
+  v:{t:"tb",cap:"키오스크 입실 기록",h:["student","class_session","checkin_at"],r:[["민수","MATH1-2 · 11/24","18:58"],["지영","MATH1-2 · 11/24","19:03"]]}},
+ {q:"'결석 3회 이상'을 <b>출석 팩트만으로</b> 셀 수 있을까?",
+  v:{t:"vs",a:{h:"수강생 명단 (MATH1-2)",b:["민수","지영","철수"]},b:{h:"11/24 입실 기록",b:["민수","지영","(철수는 행 없음)"]}}},
+ {q:"'출석했어야 하는 목록' <b>fct_class_roster</b>는 어떻게 만들까?",
+  v:{t:"tl",cap:"철수",ev:[["9/1","MATH1-2 수강신청"],["10/15","수강 취소"],["11/24","MATH1-2 수업 회차 → 철수는 명단에?"]]}},
+ {q:"결석 목록을 뽑는 <b>JOIN 방향</b>은?",
+  v:{t:"vs",a:{h:"roster (있어야 했던 것)",b:["민수","지영","철수"]},b:{h:"attendance (실제)",b:["민수","지영"]}}},
+ {q:"이 강사의 <b>출석률</b>을 계산하는 올바른 방법은?",
+  v:{t:"tb",h:["학생","출석","대상 수업","개인 출석률"],r:[["A","2","2","100%"],["B","10","20","50%"]]}}
+],
+dw04:[
+ {q:"380 + 305 = 685. <b>이 숫자는?</b>",
+  v:{t:"tb",cap:"fct_inventory_daily",h:["날짜","창고","상품","on_hand_qty"],r:[["11/1","이천","생수","*380"],["11/2","이천","생수","*305"]]}},
+ {q:"각 <b>방향</b>으로 더해도 될까?",
+  v:{t:"tb",cap:"fct_inventory_daily (생수)",h:["날짜","창고","on_hand_qty","shipped_qty"],r:[["11/1","이천","100","20"],["11/1","용인","50","10"],["11/2","이천","120","15"],["11/2","용인","30","25"]]}},
+ {q:"재고처럼 <b>반가산</b>인지 판정하라.",
+  v:{t:"facts",cap:"구분 기준",i:["반가산 = 어느 한 방향(보통 날짜)으로는 더하면 안 되는 값","'어느 순간의 상태'인가, '기간 동안 일어난 일'인가?"]}},
+ {q:"11/3처럼 입출고가 없는 날도 <b>행을 만들까?</b>",
+  v:{t:"tb",cap:"이천 · 생수",h:["날짜","입출고","on_hand_qty"],r:[["11/1","있음","380"],["11/2","있음","305"],["11/3","*없음","*?"],["11/4","있음","290"]]}},
+ {q:"스냅샷은 <b>1년에 몇 행?</b>",
+  v:{t:"facts",cap:"조건",i:["창고 3곳","상품 1만 개","하루 한 번, 365일"]}},
+ {q:"상품별 <b>'전 창고 합계'</b>의 일평균 재고를 구하는 SQL은?",
+  v:{t:"tb",cap:"생수 · 11/1~11/2",h:["날짜","창고","on_hand_qty"],r:[["11/1","이천","100"],["11/1","용인","50"],["11/2","이천","120"],["11/2","용인","30"]]}}
+],
+dw05:[
+ {q:"각 프로세스는 <b>어떤 팩트 유형</b>에 맞나?",
+  v:{t:"vs",a:{h:"트랜잭션 / 주기적 스냅샷",b:["트랜잭션: 사건 1건 = 1행, 추가만","주기적 스냅샷: 정해진 주기마다 상태 1행"]},b:{h:"누적 스냅샷",b:["프로세스 1건 = 1행","단계가 진행될 때마다 같은 행을 갱신"]}}},
+ {q:"O-3의 <b>accept_lag_sec</b>는?",
+  v:[{t:"fl",s:["접수","조리","배달","완료"]},
+     {t:"tb",cap:"fct_order_flow",h:["order","received_at","cooking_at","accept_lag_sec"],r:[["O-3","18:10:00","18:30:00","*?"]]}]},
+ {q:"아직 조리 전인 O-4의 <b>lag</b>는?",
+  v:{t:"tb",cap:"fct_order_flow",h:["order","received_at","cooking_at","accept_lag_sec"],r:[["O-3","18:10:00","18:30:00","1200"],["O-4","18:40:00","NULL","*?"]]}},
+ {q:"단계별 이탈(퍼널)을 구하는 SQL은?",
+  v:{t:"tb",cap:"fct_order_flow",h:["order","reached_cooking","reached_delivering","reached_completed"],r:[["O-1","1","1","1"],["O-2","1","1","0"],["O-3","1","0","0"]]}},
+ {q:"매일 incremental MERGE. <b>갱신 대상</b>을 찾는 기준은?",
+  v:{t:"tl",cap:"주문 O-9",ev:[["11/23","접수 (received_at)"],["11/24","조리 시작"],["11/26 오늘","*배달 완료 → 이 행을 갱신해야 한다"]]}},
+ {q:"누적 스냅샷이 <b>맞지 않는</b> 프로세스는?",
+  v:[{t:"fl",cap:"흐름 A",s:["접수","조리","배달","완료"]},
+     {t:"fl",cap:"흐름 B",s:["접수","조리","배달","!조리 (재조리)","배달","완료"]}]}
+],
+dw06:[
+ {q:"속성마다 <b>변경 처리 방식</b>은?",
+  v:{t:"tl",cap:"김회원",ev:[["1/10","가입 · 브론즈 · 서울"],["3/2","이름 오타 수정"],["5/1","실버로 승급"],["8/15","부산으로 이사"],["11/1","골드로 승급"]]}},
+ {q:"dim_customer에 김회원은 <b>몇 행?</b>",
+  v:{t:"tl",cap:"김회원",ev:[["1/10","가입 · 브론즈 · 서울"],["3/2","이름 오타 수정 (Type 1)"],["5/1","실버로 승급 (Type 2)"],["8/15","부산으로 이사 (Type 2)"],["11/1","골드로 승급 (Type 2)"]]}},
+ {q:"주문 팩트는 <b>어떤 키</b>를 들고 있어야 할까?",
+  v:{t:"tb",cap:"dim_customer",h:["customer_key","customer_id","등급","지역","valid_from","valid_to"],r:[["1","*C-1","브론즈","서울","1/10","4/30"],["2","*C-1","실버","서울","5/1","8/14"],["3","*C-1","실버","부산","8/15","10/31"],["4","*C-1","골드","부산","11/1","9999-12-31"]]}},
+ {q:"<b>주문 당시 등급</b> 기준, 김회원의 실버 매출은?",
+  v:[{t:"tb",cap:"dim_customer",h:["key","등급","valid_from","valid_to"],r:[["1","브론즈","1/10","4/30"],["2","실버","5/1","8/14"],["3","실버","8/15","10/31"],["4","골드","11/1","9999-12-31"]]},
+     {t:"tb",cap:"주문",h:["주문일","금액"],r:[["2월","30,000"],["6월","50,000"],["9월","70,000"],["11월","100,000"]]}]},
+ {q:"<b>현재 등급</b> 기준, 김회원의 골드 매출은?",
+  v:[{t:"tb",cap:"dim_customer (현재 행)",h:["key","등급","is_current"],r:[["4","*골드","true"]]},
+     {t:"tb",cap:"주문",h:["주문일","금액"],r:[["2월","30,000"],["6월","50,000"],["9월","70,000"],["11월","100,000"]]}]},
+ {q:"8/15 주문을 <code>BETWEEN valid_from AND valid_to</code>로 조인하면?",
+  v:{t:"tb",cap:"잘못 만든 dim_customer (valid_to = 다음 valid_from)",h:["key","등급·지역","valid_from","valid_to"],r:[["2","실버·서울","5/1","*8/15"],["3","실버·부산","*8/15","11/1"]]}}
+],
+dw07:[
+ {q:"판매에 강사를 그냥 JOIN한 뒤 <b>SUM(amount)</b>는?",
+  v:[{t:"tb",cap:"판매",h:["판매","강의","amount"],r:[["S1","수학","100,000"],["S2","패키지","200,000"],["S3","패키지","200,000"]]},
+     {t:"tb",cap:"강의–강사",h:["강의","강사","비율"],r:[["수학","김수학","1.0"],["패키지","이국어","0.6"],["패키지","박사탐","0.4"]]}]},
+ {q:"이국어의 <b>정산 매출</b>(비율 적용)은?",
+  v:[{t:"tb",cap:"판매",h:["판매","강의","amount"],r:[["S1","수학","100,000"],["S2","패키지","200,000"],["S3","패키지","200,000"]]},
+     {t:"tb",cap:"강의–강사",h:["강의","강사","비율"],r:[["수학","김수학","1.0"],["패키지","*이국어","*0.6"],["패키지","박사탐","0.4"]]}]},
+ {q:"강사별 <b>참여 매출</b>(비율 무시)을 전부 더하면?",
+  v:{t:"tb",cap:"참여 매출 (비율 무시)",h:["강사","참여 매출"],r:[["이국어","400,000"],["박사탐","400,000"],["김수학","100,000"],["합계","*900,000 vs 실제 500,000"]]}},
+ {q:"판매 팩트와 강사는 <b>어떻게 연결</b>할까?",
+  v:{t:"facts",cap:"조건",i:["판매 1건 = 강의 1개","강의 1개 = 강사 여러 명 + 강사마다 비율","강사 1명도 강의 여러 개"]}},
+ {q:"브리지에 꼭 걸어야 할 <b>데이터 테스트</b>는?",
+  v:{t:"tb",cap:"bridge_course_instructor",h:["course","instructor","allocation"],r:[["수학","김수학","1.0"],["패키지","이국어","0.6"],["패키지","박사탐","0.4"]]}},
+ {q:"2027년부터 비율이 <b>50 : 50</b>으로 바뀐다면?",
+  v:{t:"tl",cap:"패키지 비율",ev:[["~2026","이국어 60 · 박사탐 40"],["2027-01-01~","이국어 50 · 박사탐 50"],["2027-03","2026년 정산을 다시 돌린다 → 어느 비율?"]]}}
+]
+};
+STAGES.forEach(s => s.qs.forEach((q,i) => { const x=(VIS[s.id]||[])[i]; if(x){ if(x.q) q.q=x.q; q.v=x.v; } }));
+
 /* ───────────── 상태 ───────────── */
 const KEY = "modeling-arcade-v1";
 const LEVELS = [[0,"인턴 모델러"],[200,"주니어 모델러"],[500,"모델러"],[900,"시니어 모델러"],[1400,"데이터 아키텍트"],[2100,"킴벌의 제자"]];
@@ -653,6 +920,23 @@ const keySvg = lost => `<svg class="key ${lost?"lost":""}" viewBox="0 0 32 32" a
 const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
 function popText(t){ const p=document.createElement("div"); p.className="pop"; p.textContent=t; document.body.appendChild(p); setTimeout(()=>p.remove(),950); }
 const KIND = {mcq:"객관식",sort:"분류",num:"계산",bug:"버그 찾기"};
+/* 문제 시각화 렌더러 */
+function cell(v){ v=String(v); const m={"!":"bad","*":"hl","+":"ok","~":"mute"}[v[0]]; return m ? `<td class="${m}">${esc(v.slice(1))}</td>` : `<td>${esc(v)}</td>`; }
+function col(c){ c=String(c); if(c==="?") return `<span class="slot">? <i class="fk">빈 칸</i></span>`;
+  const m=c.match(/^(.*?)\s+(PK·FK|PK|FK)(.*)$/); const slot=/\?/.test(c);
+  if(m) return `<span class="${slot?"slot":""}">${esc(m[1])}${esc(m[3])} <i class="${m[2]==="FK"?"fk":"pk"}">${m[2]}</i></span>`;
+  return `<span class="${slot?"slot":""}">${esc(c)}</span>`; }
+function vis1(v){
+  const cap = v.cap ? `<div class="vcap">${esc(v.cap)}</div>` : "";
+  if(v.t==="tb") return `<div>${cap}<div class="vtb"><table><thead><tr>${v.h.map(x=>`<th>${esc(x)}</th>`).join("")}</tr></thead><tbody>${v.r.map(r=>`<tr>${r.map(cell).join("")}</tr>`).join("")}</tbody></table></div></div>`;
+  if(v.t==="erd") return `<div>${cap}<div class="verd">${v.e.map((e,i)=>{ const box=`<div class="vent"><b>${esc(e.n)}</b>${e.c.map(col).join("")}</div>`; const lk=i>0&&v.l&&v.l[i-1]; return i===0?box:`<span class="vpair">${lk?`<span class="vlink">${esc(lk)}</span>`:""}${box}</span>`; }).join("")}</div></div>`;
+  if(v.t==="tl") return `<div>${cap}<ul class="vtl">${v.ev.map(([a,b])=>{ const hl=String(b)[0]==="*"; return `<li class="${hl?"hl":""}"><b>${esc(a)}</b> ${esc(hl?b.slice(1):b)}</li>`; }).join("")}</ul></div>`;
+  if(v.t==="fl") return `<div>${cap}<div class="vfl">${v.s.map(x=>{ const bad=x[0]==="!"; return `<span class="${bad?"bad":""}">${esc(bad?x.slice(1):x)}</span>`; }).join("<em>→</em>")}</div></div>`;
+  if(v.t==="facts") return `<div>${cap}<ul class="vfacts">${v.i.map(x=>`<li><span>${x}</span></li>`).join("")}</ul></div>`;
+  if(v.t==="vs") return `<div>${cap}<div class="vvs">${[v.a,v.b].map(s=>`<div><h4>${esc(s.h)}</h4><ul>${s.b.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("")}</div></div>`;
+  return "";
+}
+const visual = q => !q.v ? "" : `<div class="vis">${[].concat(q.v).map(vis1).join("")}</div>`;
 /* 힌트: 열 때마다 이 문제에서 받을 XP 비율이 줄어든다. 3단계를 다 열면 콤보도 끊긴다. */
 const HINT_STEP = ["관점","좁히기","결정타"];
 const HINT_MULT = [1, 0.7, 0.4, 0.2];
@@ -791,7 +1075,8 @@ function ask(){
   }
   $app.innerHTML = topbar() + `<section class="panel" id="card">
     <div class="qhead"><span class="tag ${s.track}">${s.track.toUpperCase()}-0${s.day} ${esc(s.title)}</span><span class="tag kind">${KIND[q.t]}</span><span class="tag kind">${run.qi+1} / ${run.list.length}</span></div>
-    <p class="q">${q.q}</p>${body}<div class="hints" id="hints"></div><div id="fbslot"></div></section>`;
+    <details class="scnbox"><summary>📋 시나리오 다시 보기</summary><p>${esc(s.scn)}</p></details>
+    ${visual(q)}<p class="q">${q.q}</p>${body}<div class="hints" id="hints"></div><div id="fbslot"></div></section>`;
   document.getElementById("quit").onclick = home;
   run.hintN = 0;
   wire(q);
