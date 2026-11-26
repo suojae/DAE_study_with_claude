@@ -140,6 +140,23 @@ code,.mono{font-family:var(--f-mono)}
 .code button:disabled{cursor:default}
 .hint{font-size:13px;color:var(--muted);margin-top:8px}
 .submitbar{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center}
+/* 단계별 힌트 */
+.hints{margin-top:16px;border-top:1px dashed var(--line);padding-top:12px}
+.hintbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hbtn{display:inline-flex;gap:8px;align-items:center;border:2px solid var(--accent);color:var(--accent);background:var(--card);border-radius:999px;padding:5px 14px 5px 10px;font-weight:700;font-size:14px}
+.hbtn:hover:not(:disabled){background:color-mix(in srgb,var(--accent) 10%,var(--card))}
+.hbtn:disabled{opacity:.45;cursor:default}
+.hbtn kbd{font-family:var(--f-mono);font-size:11px;border:1.5px solid currentColor;border-radius:3px;padding:0 4px;font-weight:600}
+.hdots{display:flex;gap:4px}
+.hdots i{width:22px;height:6px;border-radius:3px;background:var(--grid);border:1px solid var(--line)}
+.hdots i.on{background:var(--accent);border-color:var(--accent)}
+.hcost{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.hcard{margin-top:10px;border-left:4px solid var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--card));border-radius:0 6px 6px 0;padding:9px 12px;font-size:14.5px;line-height:1.55}
+.hcard.new{animation:hin .25s ease-out}
+.hcard .hl{display:block;font-family:var(--f-mono);font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--accent);margin-bottom:2px}
+.hcard.last{border-left-color:var(--gold)} .hcard.last .hl{color:var(--gold)}
+.hcard code{font-size:.9em;background:var(--grid);padding:1px 5px;border-radius:3px}
+@keyframes hin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .fb{margin-top:16px;border-radius:6px;padding:12px 14px;border:2px solid;font-size:14.5px}
 .fb.ok{border-color:var(--ok);background:var(--ok-soft)} .fb.no{border-color:var(--bad);background:var(--bad-soft)}
 .fb .head{font-family:var(--f-display);font-size:18px;margin-bottom:4px}
@@ -149,7 +166,7 @@ code,.mono{font-family:var(--f-mono)}
 @keyframes pop{0%{opacity:0;transform:translate(-50%,10px) scale(.8)}20%{opacity:1;transform:translate(-50%,0) scale(1.05)}100%{opacity:0;transform:translate(-50%,-40px) scale(1)}}
 .shake{animation:shake .35s}
 @keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
-@media (prefers-reduced-motion:reduce){.pop,.shake{animation:none}.pop{display:none}.entity:hover,.btn:hover{transform:none}}
+@media (prefers-reduced-motion:reduce){.pop,.shake,.hcard{animation:none}.pop{display:none}.entity:hover,.btn:hover{transform:none}}
 
 /* briefing & boss */
 .brief h2{font-size:28px;margin:6px 0 8px}
@@ -498,6 +515,116 @@ const STAGES = [
  pts:["판매 팩트 grain을 '주문 1건의 강의 1개'로 두고 강사 FK를 빼었다","bridge_course_instructor에 allocation(가중치)을 뒀다","weighted(정산)와 impact(참여)를 구분했다","allocation 합 = 1 테스트를 적었다","비율 변경용 valid_from / valid_to"]}
 ];
 
+/* ───────────── 단계별 힌트 (스테이지 id → 문제 순서대로 [관점, 좁히기, 결정타]) ─────────────
+   새 문제를 추가하면 여기에도 같은 순서로 3개씩 추가. HTML(<code>) 사용 가능. */
+const HINTS = {
+rdb01:[
+ ["B-0001과 B-0002는 같은 '책'일까, 다른 '물건'일까? 서가에서 손에 잡히는 게 무엇인지 생각해보자.","한 테이블에 두면 제목·출판사가 몇 번 반복될지 세어보자. 반복되는 값은 다른 테이블로 빼라는 신호다.","식별자가 두 종류다. 작품을 가리키는 ISBN, 한 권을 가리키는 등록번호. 식별자가 다르면 엔티티도 다르다."],
+ ["속성마다 '이건 누구(무엇)에 대한 사실인가?'를 물어보자.","반납일은 책의 속성도 회원의 속성도 아니다. '누가 어떤 권을 빌렸다'는 사건이 있어야 생기는 값이다.","서가 위치는 한 권마다(book_copy), 출판사는 작품마다(book). 저자 순서는 '이 책에서 이 저자가' 몇 번째인지라 둘을 잇는 테이블에 붙는다."],
+ ["이 규칙은 '언제나'가 아니라 '같은 시점에'다. 반납 후엔 같은 권을 다른 사람이, 혹은 같은 사람이 또 빌려도 된다.","UNIQUE를 테이블 전체에 걸면 과거 대출 이력까지 검사 대상이 된다. 검사 대상을 '지금 빌려간 행'으로만 좁힐 방법은?","PostgreSQL 인덱스에는 WHERE 조건을 붙일 수 있다(partial index). 미반납 = <code>returned_at IS NULL</code>."],
+ ["1정규형부터: 한 칸에 값이 여러 개 들어간 컬럼이 있나?","'대출 중인가'는 책(작품)의 상태일까? 같은 책이 3권 있으면 이 값은 무슨 뜻이 될까? 그리고 같은 사람이 같은 권을 다음 달에 또 빌리면?","3줄이다. 문자열로 뭉친 저자 목록, 작품 테이블의 대출 여부 플래그, 재대출까지 막아버리는 UNIQUE."],
+ ["이 규칙을 판단하려면 행을 몇 개 봐야 할까?","CHECK는 지금 넣는 그 행 하나만 본다. UNIQUE·FK도 '개수 세기'는 못 한다.","'개수 세기' 규칙은 선언적 제약으로 못 건다. 남는 선택지는 하나다."]
+],
+rdb02:[
+ ["'3반'이라고만 말하면 어느 반인지 알 수 있을까?","혼자서는 식별되지 못하고 부모의 키를 빌려야 하는 엔티티를 뭐라고 불렀는지 떠올려보자.","분반 번호는 과목·학기 안에서만 유일한 부분 키(partial key)다."],
+ ["시나리오를 다시 읽자. 분반 번호는 '과목 안에서만', 그리고 '학기마다' 다시 1부터.","과목만 붙이면 학기가 바뀔 때 무슨 일이 생길까? 2026-1 MATH1 1반과 2026-2 MATH1 1반.","번호를 다시 매기는 범위(과목, 학기)를 전부 키에 넣어야 한다."],
+ ["수강신청 = 분반 × 학생. PK는 양쪽 식별자를 합친 것이다.","분반의 식별자는 앞 문제에서 컬럼 몇 개였지?","분반 키 3개(term, course_code, section_no) + student_id."],
+ ["복합 키를 자식, 손자 테이블까지 계속 물려주면 FK와 JOIN 조건이 어떻게 될까?","대리키를 쓰면 편해진다. 그럼 '같은 학기·과목에 1반이 둘'인 데이터는 무엇이 막아주지?","대리키는 편의일 뿐이다. 비즈니스 식별 규칙은 UNIQUE로 남긴다."],
+ ["분반이 지워지면 수강신청 기록(= 성적 이력)은 어떻게 돼야 할까?","CASCADE면 이력이 같이 사라지고, SET NULL이면 '어느 반 수강신청인지'가 사라진다.","지키고 싶은 건 학사 이력이다. 참조 중인 부모를 못 지우게 막는 정책을 고르자."]
+],
+rdb03:[
+ ["재귀 관계 = 관계 양쪽 끝이 같은 엔티티. 시나리오의 관계를 하나씩 적어보자.","직원–직원, 부서–부서 사이의 관계를 모두 찾자. M:N도 재귀일 수 있다.","직원→상사, 부서→상위 부서, 그리고 시작·종료일이 있는 직원↔직원 관계 하나 더."],
+ ["각 관계의 카디널리티부터: 1:N인가 M:N인가?","1:N은 N쪽에 FK 컬럼 하나면 된다. 재귀여도 똑같다.","M:N이면서 시작·종료일 같은 자체 속성까지 있는 관계는 하나뿐이다."],
+ ["<code>employee_id_1</code>, <code>employee_id_2</code>만 보고 누가 멘토인지 알 수 있을까?","양쪽이 같은 테이블을 가리키면 컬럼 이름이 유일한 방향 정보다.","parent/child는 트리(상하) 구조의 말이라 멘토링과 의미가 다르다. 관계 속 '역할 이름'을 그대로 쓰자."],
+ ["'소속'과 '부서장'은 카디널리티가 같을까?","부서장이 다른 부서를 대행하면 is_head 하나로 어떻게 표현하지? 같은 부서에 is_head = true가 둘 들어가면 누가 막지?","두 관계는 의미가 다른 별개 관계(다중 관계)라 컬럼도 따로 있어야 한다."],
+ ["CHECK는 몇 개의 행을 보고 판단할까?","A→B, B→A 순환을 알아내려면 행 두 개를 같이 봐야 한다.","CHECK는 같은 행 안의 값만 비교한다. 자기 자신을 상사로 두는 것만 막는다."]
+],
+rdb04:[
+ ["속성마다 물어보자: 사람 하나로 정해지나, 방 하나로 정해지나, 둘이 만나야 정해지나?","같은 사람이 A방에선 방장, B방에선 일반 멤버일 수 있다.","사람·방 조합마다 달라지는 값은 연결 테이블(room_member)로. 닉네임과 방 제목만 한쪽에 붙는다."],
+ ["<code>sender_id</code>가 app_user만 참조하면 '방 멤버인가'는 누가 검사할까?","검사하고 싶은 건 (방, 보낸 사람) 쌍이 room_member에 있느냐다.","FK는 컬럼 여러 개를 묶어서 걸 수 있다. 쌍 그대로 room_member를 참조하자."],
+ ["메시지 하나마다 읽음 행이 사용자 수만큼 생긴다.","10,000 × 1,000.","10,000,000. (대안: 멤버마다 <code>last_read_message_id</code> 하나만 두기)"],
+ ["민수가 예전에 보낸 메시지는 어떤 FK로 room_member를 가리키고 있었지?","그 행을 지우면 FK가 어떻게 될까? 재입장 이력은 어디에 남지?","지우지 말고 '나갔다'는 상태를 기록하자."],
+ ["앞 문제에서 '방 멤버만 메시지' 규칙을 어떻게 걸었는지 떠올려보자.","방 테이블에 멤버를 배열로 두면 역할·알림 설정은 어디에 넣지?","2줄이다. 배열 컬럼, 그리고 멤버십을 거치지 않는 sender FK. reply_to 자기 참조는 정상이다."]
+],
+rdb05:[
+ ["예약 한 건에 동시에 참여하는 엔티티가 몇 개인가?","(의사, 진료실)과 (의사, 환자)를 따로 저장하면 둘을 다시 붙일 연결고리가 있을까?","3항 관계를 2항 둘로 쪼개면 '누가·어디서·언제'의 조합 정보를 잃는다."],
+ ["UNIQUE는 언제 위반으로 판단할까?","09:00과 09:30은 같은 값인가?","UNIQUE는 값이 완전히 같을 때만 막는다. 구간이 겹치는지는 모른다."],
+ ["'SELECT로 확인 → INSERT'를 두 요청이 동시에 하면 어떻게 될까?","PostgreSQL에는 '이 연산자로 비교해서 겹치는 행이 있으면 안 된다'는 제약이 있다. 구간은 tstzrange, 겹침 연산자는 <code>&amp;&amp;</code>.","EXCLUDE 제약 + WHERE로 취소 건을 뺀다."],
+ ["<code>[</code>는 포함, <code>)</code>는 미포함이다.","<code>[09:00, 10:00)</code>은 10:00을 포함할까?","앞 예약이 10:00을 포함하지 않으니 10:00 시작 예약과 공유하는 순간이 없다."],
+ ["진단은 환자의 평생 속성일까, 특정 진료의 결과일까?","진단이 여러 개인데 한 칸에 'J00,J02'로 넣으면 몇 정규형 위반이지?","진료 1회(예약)와 진단 코드의 M:N → 연결 테이블."]
+],
+rdb06:[
+ ["payment 테이블은 결제 수단을 FK로 가리켜야 한다. 가리킬 테이블이 하나여야 할까, 셋이어도 될까?","FK 하나는 테이블 하나만 참조할 수 있다.","카드·계좌·간편결제가 따로 놀면 '아무 결제 수단'을 가리키는 FK가 불가능하다."],
+ ["<code>UNIQUE (member_id, is_default)</code>는 is_default = false인 행도 검사할까?","검사 대상을 '기본이면서 삭제 안 된 수단'으로만 좁히고 싶다.","partial UNIQUE index: member_id에 걸고 <code>WHERE is_default AND deleted_at IS NULL</code>."],
+ ["카드번호 원문이 DB에 있으면 어떤 규제 대상이 될까?","암호화해도 '원문 보관'이다. 실제 결제는 누가 처리하지?","PG가 결제용 토큰을 준다. 화면 표시용으론 끝 4자리면 충분하다."],
+ ["FK는 부모에 '어떤 값 조합'이 존재하는지 검사할 수 있다.","자식이 부모의 (id, method_type)을 참조하고, 자식 method_type은 항상 'card'로 고정돼 있다면?","부모에 UNIQUE(id, method_type), 자식에 CHECK(method_type = 'card') + 복합 FK."],
+ ["과거 결제가 참조 중인 행을 실제로 DELETE 하면 남는 선택지가 뭐지?","CASCADE면 결제까지 사라지고, SET NULL이면 '무엇으로 결제했는지'가 사라진다.","행은 남기고 '삭제됨' 표시만 한다."]
+],
+rdb07:[
+ ["order_item이 가격을 직접 저장하지 않으면 화면의 가격은 어디서 올까?","JOIN은 항상 '지금' 값을 가져온다.","menu.price를 JOIN해서 보여주니 현재 가격이 보인다."],
+ ["주문 이후 원본이 바뀌어도 '그때 값'이 유지돼야 하는 컬럼은?","주문에서만 생기는 값(수량, 요청사항)은 원본이 따로 없다.","이름·가격·주소는 복사, menu_id는 분석용 FK, 수량·요청사항은 주문 고유 값."],
+ ["각 테이블이 무엇과 무엇의 관계인지 보자.","주문–메뉴 사이의 사건, 시간 따라 쌓이는 기록, 리뷰당 0~1개, 한 속성에 여러 값.","review_photo는 리뷰 하나에 사진 여러 장 = 다중값 속성을 테이블로 뺀 것이다."],
+ ["1:1을 FK로 표현하려면 FK 쪽에 무엇을 더하면 될까?","customer_order에 <code>review_id NOT NULL</code>을 두면 리뷰 없는 주문은 어떻게 되지?","FK 컬럼에 UNIQUE를 걸면 같은 주문에 리뷰 두 개가 불가능해진다."],
+ ["'정확히 1개'를 확인하려면 행을 몇 개 봐야 할까?","CHECK·UNIQUE·FK는 행을 세지 못한다. RDB-01의 '최대 5권'과 같은 유형이다.","검증은 앱이 하고, 규칙 자체는 min/max 컬럼으로 데이터에 남긴다."]
+],
+dw01:[
+ ["질문 목록을 보자. 카테고리별, 행사 상품별. 답하려면 팩트 한 행에 상품이 붙어 있어야 할까?","grain은 가장 잘게 잡는 게 원칙이다. 합치는 건 나중에 언제든 되지만 쪼개는 건 불가능하다.","POS가 찍는 가장 작은 단위는 영수증의 '한 줄'이다."],
+ ["팩트 = 더하거나 계산할 숫자, 차원 = 'by ~'로 자르는 기준.","점포·계산원·행사는 그룹핑 기준(차원). 수량·금액·할인은 숫자(팩트).","영수증번호는 기준이긴 한데 붙일 속성이 없다. 팩트에 번호만 남기는 degenerate 차원이다."],
+ ["점포 두 곳의 값을 더했을 때 의미가 있는지 하나씩 시험해보자.","단가 1,000원 + 1,500원 = 2,500원? 이익률 30% + 20% = 50%?","금액·수량류는 가산, 단가·비율은 비가산."],
+ ["1년 = 365일. 하루는 몇 분?","24 × 60 = 1,440분.","365 × 1,440."],
+ ["팩트 FK가 NULL인 행을 dim_promotion과 INNER JOIN하면?","행이 사라지면 매출 합계는 어떻게 되지?","'행사 없음'도 차원의 한 행으로 만들어 두고 그 키를 넣는다."],
+ ["객단가의 분모는 '영수증 수'다. 이 팩트의 한 행은 영수증일까?","COUNT(*)는 라인 수다. 영수증 수를 세려면 영수증을 구분하는 값이 필요하다.","앞에서 팩트에 남긴 degenerate 차원 receipt_no를 중복 없이 세자."],
+ ["모든 컬럼의 grain이 '영수증 한 줄'과 같은지 확인하자.","영수증 한 장이 3줄이면 영수증 총액은 몇 번 저장될까? 그걸 SUM하면?","2줄이다. grain이 다른 영수증 총액, 그리고 비가산인 비율 컬럼."]
+],
+dw02:[
+ ["요일은 함수로 나온다. '설 연휴'나 '회계분기'도 함수로 나올까?","리포트 A는 토·일, 리포트 B는 금~일을 주말로 쓰면 무슨 일이 생길까?","함수로 못 만드는 회사 달력 + 모두가 같은 정의를 쓰게 하는 것(conformed)."],
+ ["FY2026은 2026년 3월에 시작해서 언제 끝날까?","3~5월 FQ1, 6~8월 FQ2, 9~11월 FQ3, 12~2월 FQ4.","2027년 2월은 FY2026의 마지막 달이다."],
+ ["질문의 키워드를 컬럼명에서 찾아보자.","주말 → is_…, 설 → …_name, 회계 분기 → fiscal_…, 월급날 → days_…, 주차 → …_week.","단어 그대로 매칭된다. 고민할수록 손해다."],
+ ["날짜 차원을 세 벌 만들면 공휴일 하나를 고칠 때 몇 군데를 고쳐야 할까?","물리 테이블은 하나, 이름(역할)만 여러 개라면?","같은 차원이 여러 역할로 쓰이는 패턴 = role-playing dimension."],
+ ["DW-01의 '행사 없음' 문제와 같은 상황이다.","NULL FK면 JOIN에서 행이 사라진다. 그럼 '미배송 N건'을 셀 수 있을까?","'미정'을 뜻하는 특수 날짜 행(먼 미래의 날짜 키)을 만든다."]
+],
+dw03:[
+ ["측정값(숫자)이 없으면 팩트가 아닐까?","'학생이 그 수업에 왔다'는 사건 자체가 기록이다. 몇 명 왔는지는 어떻게 세지?","측정값 없이 사건만 기록하는 팩트를 뭐라고 불렀는지 떠올리자."],
+ ["결석한 학생은 입실 기록 테이블에 행이 있을까?","없는 행은 COUNT할 수 없다. 비교 대상인 '원래 와야 했던 명단'이 필요하다.","'출석했어야 하는 목록'을 별도 팩트(coverage)로 만든다."],
+ ["'와야 했던 사람' = 그 회차 분반을 그날 수강 중인 학생.","수강 취소한 학생은 취소일 이후 회차에 들어가야 할까?","수업 회차 × 그 날짜에 유효한 수강신청."],
+ ["기준(LEFT JOIN의 왼쪽)은 '있어야 했던 것'일까, '실제 있었던 것'일까?","roster를 왼쪽에 두고 attendance를 붙이면, 짝 없는 행은 어느 쪽 컬럼이 NULL이 될까?","roster LEFT JOIN attendance, attendance 쪽이 NULL인 행 = 결석."],
+ ["학생 A는 2회 중 2회, 학생 B는 20회 중 10회 출석. 평균의 평균은?","(100% + 50%) ÷ 2 = 75%. 실제로는 12 ÷ 22 ≈ 55%.","비율은 분자 합 ÷ 분모 합으로 계산한다."]
+],
+dw04:[
+ ["잔고 100만 원이 이틀 연속이면 내 돈은 200만 원일까?","재고는 '흐름'일까, '어느 시점의 상태'일까?","상태(잔액)는 날짜 방향으로 더하면 안 된다."],
+ ["같은 날 이천 100개 + 용인 50개 = 150개. 의미 있나?","11/1 380개 + 11/2 305개는? 출고량은 이틀 치를 더하면?","잔액(on_hand)은 날짜 방향만 금지, 흐름(shipped)은 어느 방향이든 OK."],
+ ["'어느 순간의 상태'인지, '기간 동안 일어난 일'인지 구분하자.","잔고·잔액은 상태다. MAU는 한 달 동안의 사람 수라 월끼리 더하면 같은 사람이 중복된다.","흐름(가산)은 주문 금액과 출고 수량뿐이다."],
+ ["입출고가 없던 날의 재고는 0일까, 전날과 같을까?","행이 빠지면 '날짜 수'로 나누는 평균 재고는 어떻게 될까?","주기적 스냅샷은 변화가 없어도 매 주기마다 행을 만든다."],
+ ["행 = 창고 × 상품 × 날짜.","3 × 10,000 = 하루 30,000행.","30,000 × 365."],
+ ["<code>AVG(on_hand_qty)</code>는 무엇의 평균일까? 행 하나 = 창고 하나의 하루.","원하는 건 '전 창고 합계'의 날짜 평균이다. 먼저 창고 방향으로 합쳐야 한다.","전부 SUM한 다음 날짜 수로 나눈다."]
+],
+dw05:[
+ ["트랜잭션 = 사건 하나당 한 행, 주기적 스냅샷 = 정해진 주기마다의 상태, 누적 스냅샷 = 프로세스 하나가 한 행.","잔고·재고처럼 '매일/매월의 상태'는? 단계가 정해진 흐름은?","시작과 끝이 있는 단계 흐름(주문, 대출 심사)은 누적 스냅샷."],
+ ["두 시각의 차이를 초로 바꾸자.","18:10 → 18:30 = 20분.","20 × 60."],
+ ["AVG는 0과 NULL을 어떻게 다르게 처리할까?","0을 넣으면 '0초 만에 끝난' 주문으로 평균에 섞인다.","아직 일어나지 않은 일은 '값 없음'이다."],
+ ["누적 스냅샷 한 행에는 단계별 도달 여부가 이미 들어 있다.","도달 = 1, 미도달 = 0 플래그라면 몇 건 도달했는지는 어떻게 구하지?","플래그 SUM 한 줄이면 된다. self join은 필요 없다."],
+ ["누적 스냅샷 행은 언제 다시 바뀔까?","3일 전에 접수된 주문이 오늘 완료되면, received_at 기준 필터에 걸릴까?","'오늘 바뀐 행'을 찾아야 하니 변경 시각이 기준이다."],
+ ["누적 스냅샷에는 단계마다 시각 컬럼이 하나씩 있다.","조리 → 배달 → 다시 조리가 되면 cooking_at에는 어느 시각을 넣지?","한 방향 흐름에 맞는 패턴이다. 되돌아가는 흐름은 상태 이력 팩트로 본다."]
+],
+dw06:[
+ ["'그때 값'으로 분석할 일이 있는 속성인가?","오타 나기 전 이름으로 매출을 볼 일이 있을까? 등급·지역별 매출은 '당시 기준'이 필요할까?","분석 축이 되는 등급·거주지는 Type 2, 나머지는 Type 1."],
+ ["가입 시점의 1행에서 시작하자.","이름 오타 수정은 Type 1(덮어쓰기)이라 행이 늘지 않는다.","Type 2 변경 횟수(등급 2번, 이사 1번) + 1."],
+ ["김회원의 자연키는 몇 개, 행은 몇 개?","자연키로 JOIN하면 4개 버전 중 어느 걸 붙여야 할지 알 수 있을까?","버전마다 다른 키 = 대리키. 주문 시점에 유효했던 버전의 키다."],
+ ["주문마다 그 날짜에 유효했던 등급을 붙여보자.","2월 = 브론즈, 6월 = 실버(5/1~), 9월 = 실버(이사만 했다), 11월 = 골드.","실버 기간 주문 2건을 더한다. 5만 + 7만."],
+ ["'현재 등급' 기준이면 과거 주문에도 지금 등급을 붙인다.","김회원의 현재 등급은 골드다.","모든 주문 합계: 3만 + 5만 + 7만 + 10만."],
+ ["valid_to가 5/1이고 다음 행 valid_from도 5/1이다. 5/1 주문은 BETWEEN에 몇 번 걸릴까?","BETWEEN은 양 끝을 포함한다.","경계일 주문이 두 행에 매칭된다 → JOIN fan-out으로 매출 중복."]
+],
+dw07:[
+ ["강의 하나에 강사가 2명이면 판매 1건이 JOIN 후 몇 행이 될까?","패키지 2건 × 강사 2명 = 4행, 각 20만 원.","10만 + 4 × 20만."],
+ ["이국어가 참여한 강의는 패키지다. 패키지 매출 총액은?","20만 × 2건 = 40만.","40만 × 이국어 비율 60%."],
+ ["이국어 40만 + 박사탐 40만 + 김수학 10만 = ?","실제 매출은 50만이다. 차이는 어디서 왔지?","비율을 무시하고 더하면 같은 매출을 강사 수만큼 중복 집계한다."],
+ ["판매 팩트 한 행이 아는 건 '어떤 강의가 팔렸나'까지다.","강의–강사는 M:N이고 비율이라는 속성이 있다. M:N + 속성이면?","팩트 → 강의 차원 → 비율을 가진 브리지 → 강사 차원."],
+ ["가중치 합이 1이어야 하는 단위는 강의일까, 강사일까?","한 강의의 매출을 강사들에게 '나눠주는' 비율이다.","한 강의(유효 기간) 안의 비율 합 = 1.0."],
+ ["덮어쓰면 2026년 정산을 다시 돌렸을 때 어느 비율이 적용될까?","DW-06에서 등급 변경을 어떻게 처리했는지 떠올려보자.","브리지에도 SCD2: 유효 기간 + 판매일 기준 조인."]
+]
+};
+STAGES.forEach(s => s.qs.forEach((q,i) => { q.h = (HINTS[s.id]||[])[i] || []; }));
+
 /* ───────────── 상태 ───────────── */
 const KEY = "modeling-arcade-v1";
 const LEVELS = [[0,"인턴 모델러"],[200,"주니어 모델러"],[500,"모델러"],[900,"시니어 모델러"],[1400,"데이터 아키텍트"],[2100,"킴벌의 제자"]];
@@ -526,6 +653,24 @@ const keySvg = lost => `<svg class="key ${lost?"lost":""}" viewBox="0 0 32 32" a
 const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
 function popText(t){ const p=document.createElement("div"); p.className="pop"; p.textContent=t; document.body.appendChild(p); setTimeout(()=>p.remove(),950); }
 const KIND = {mcq:"객관식",sort:"분류",num:"계산",bug:"버그 찾기"};
+/* 힌트: 열 때마다 이 문제에서 받을 XP 비율이 줄어든다. 3단계를 다 열면 콤보도 끊긴다. */
+const HINT_STEP = ["관점","좁히기","결정타"];
+const HINT_MULT = [1, 0.7, 0.4, 0.2];
+function renderHints(q, locked=false){
+  const n = run.hintN, max = q.h.length, el = document.getElementById("hints");
+  if(!el || !max) return;
+  const nextPct = Math.round(HINT_MULT[Math.min(n+1,3)]*100);
+  const label = n>=max ? "힌트를 모두 열었다" : `힌트 ${n+1} 열기`;
+  const cost = locked ? "" : n>=max ? `이 문제 XP ${Math.round(HINT_MULT[n]*100)}% · 콤보 유지 안 됨` : `열면 이 문제 XP ${nextPct}%${n+1===max?" · 콤보 끊김":""}`;
+  el.innerHTML = `<div class="hintbar">
+      <button class="hbtn" id="hbtn" ${n>=max||locked?"disabled":""} aria-label="${label}">💡 ${label} <kbd>H</kbd></button>
+      <span class="hdots" aria-hidden="true">${q.h.map((_,i)=>`<i class="${i<n?"on":""}"></i>`).join("")}</span>
+      <span class="hcost">${cost}</span>
+    </div>
+    ${q.h.slice(0,n).map((t,i)=>`<div class="hcard ${i===max-1?"last":""} ${i===n-1&&!locked?"new":""}" ${i===n-1&&!locked?'role="status"':""}><span class="hl">HINT ${i+1} · ${HINT_STEP[i]||""}</span>${t}</div>`).join("")}`;
+  const b = document.getElementById("hbtn");
+  if(b && !b.disabled) b.onclick = () => { run.hintN++; run.hintsUsed++; renderHints(q); };
+}
 
 /* ───────────── 홈 (맵) ───────────── */
 function home(){
@@ -567,7 +712,7 @@ function home(){
       return `<div class="row ${d===td?"today":""}">${node(a)}<div class="daypin">DAY<b>${d}</b></div>${node(b)}</div>`;}).join("")}
   </div>
   <div class="foot">
-    <div class="legend"><span>목숨 = PK 열쇠 3개</span><span>연속 정답 콤보 보너스</span><span>마지막은 직접 그리는 보스전</span></div>
+    <div class="legend"><span>목숨 = PK 열쇠 3개</span><span>연속 정답 콤보 보너스</span><span>막히면 💡 힌트 3단계</span><span>마지막은 직접 그리는 보스전</span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn" id="review" ${S.wrong.length?"":"disabled"}>오답 복습 ${S.wrong.length?`(${S.wrong.length})`:""}</button>
       <button class="btn ghost" id="reset">기록 초기화</button>
@@ -595,7 +740,7 @@ function brief(id){
     <div class="meta"><span class="tag ${s.track}">${s.track.toUpperCase()}-0${s.day}</span><span class="tag kind">${esc(s.tags)}</span><span class="tag kind">난이도 ${"★".repeat(s.diff)}</span></div>
     <h2>${esc(s.title)}</h2>
     <p class="scn">${esc(s.scn)}</p>
-    <p class="small" style="margin:0 0 6px">진행: 퀴즈 ${s.qs.length}문제 → 보스전(직접 설계 후 모범 답안과 대조)</p>
+    <p class="small" style="margin:0 0 6px">진행: 퀴즈 ${s.qs.length}문제 → 보스전(직접 설계 후 모범 답안과 대조) · 막히면 💡 단계별 힌트 3개 (열수록 XP 감소)</p>
     <div class="submitbar">
       <button class="btn primary" id="go">시작 (Enter)</button>
       <a class="btn ghost" href="${REPO+s.file}" target="_blank" rel="noopener">원문 문제 열기</a>
@@ -610,13 +755,13 @@ function brief(id){
 let run = null;
 function startStage(id){
   const s = byId(id);
-  run = {mode:"stage", stage:s, list:s.qs.map((q,i)=>({s,q,i})), qi:0, hearts:3, combo:0, xp:0, res:[]};
+  run = {mode:"stage", stage:s, list:s.qs.map((q,i)=>({s,q,i})), qi:0, hearts:3, combo:0, xp:0, res:[], hintsUsed:0};
   ask();
 }
 function startReview(){
   const list = S.wrong.map(k=>{ const [id,i]=k.split(":"); const s=byId(id); return s && s.qs[+i] ? {s,q:s.qs[+i],i:+i} : null; }).filter(Boolean);
   if(!list.length) return home();
-  run = {mode:"review", list:shuffle(list), qi:0, hearts:Infinity, combo:0, xp:0, res:[]};
+  run = {mode:"review", list:shuffle(list), qi:0, hearts:Infinity, combo:0, xp:0, res:[], hintsUsed:0};
   ask();
 }
 function topbar(){
@@ -646,9 +791,11 @@ function ask(){
   }
   $app.innerHTML = topbar() + `<section class="panel" id="card">
     <div class="qhead"><span class="tag ${s.track}">${s.track.toUpperCase()}-0${s.day} ${esc(s.title)}</span><span class="tag kind">${KIND[q.t]}</span><span class="tag kind">${run.qi+1} / ${run.list.length}</span></div>
-    <p class="q">${q.q}</p>${body}<div id="fbslot"></div></section>`;
+    <p class="q">${q.q}</p>${body}<div class="hints" id="hints"></div><div id="fbslot"></div></section>`;
   document.getElementById("quit").onclick = home;
+  run.hintN = 0;
   wire(q);
+  renderHints(q);
 }
 function wire(q){
   if(q.t==="mcq"){
@@ -699,16 +846,19 @@ function finish(ok, extra=""){
   const {s,q,i} = run.list[run.qi]; const key = s.id+":"+i;
   run.res[run.qi]=ok;
   let gain = 0;
-  if(ok){ gain = 10 + 5*run.combo; run.combo++; run.xp += gain; popText(`+${gain} XP${run.combo>1?` · ${run.combo}콤보`:""}`);
+  const hn = run.hintN||0, full = q.h.length && hn>=q.h.length;
+  if(ok){ gain = Math.round((10 + 5*run.combo) * HINT_MULT[Math.min(hn,3)]); run.combo = full ? 0 : run.combo+1; run.xp += gain;
+    popText(`+${gain} XP${hn?` · 힌트 ${hn}`:""}${run.combo>1?` · ${run.combo}콤보`:""}`);
     if(run.mode==="review") S.wrong = S.wrong.filter(k=>k!==key);
   } else { run.combo=0; if(run.mode==="stage") run.hearts--; if(!S.wrong.includes(key)) S.wrong.push(key);
     const c=document.getElementById("card"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake"); }
   save();
+  renderHints(q, true);
   const dead = run.mode==="stage" && run.hearts<=0;
   const last = run.qi === run.list.length-1;
   const nextLabel = dead ? "결과 보기" : last ? (run.mode==="stage" ? "보스전으로" : "복습 끝") : "다음";
   document.getElementById("fbslot").innerHTML = `<div class="fb ${ok?"ok":"no"}" role="status">
-    <div class="head">${ok?"정답":"오답"+(run.mode==="stage"?" · 열쇠 -1":"")}</div>
+    <div class="head">${ok?"정답"+(hn?` <span class="small">(힌트 ${hn}개 · XP ${Math.round(HINT_MULT[Math.min(hn,3)]*100)}%)</span>`:""):"오답"+(run.mode==="stage"?" · 열쇠 -1":"")}</div>
     ${extra && !ok?`<p class="mono" style="margin-bottom:6px">${esc(extra)}</p>`:""}<p>${q.w}</p></div>
     <div class="submitbar"><button class="btn primary" id="next">${nextLabel} (Enter)</button></div>`;
   // 상단 바 갱신
@@ -775,6 +925,7 @@ function clearStage(){
     <div class="bigstars">${[0,1,2].map(i=>starSvg(i<st)).join("")}</div>
     <div class="kv">
       <div><b>+${run.xp}</b><span>퀴즈 XP</span></div>
+      <div><b>${run.hintsUsed}</b><span>힌트 사용</span></div>
       <div><b>${got}/${s.pts.length}</b><span>설계 체크</span></div>
       <div><b>+${bossXp}</b><span>보스 XP${run.inTime?" (시간 보너스 포함)":""}</span></div>
     </div>
@@ -802,15 +953,16 @@ function reviewDone(){
   S.xp += run.xp; save();
   const ok = run.res.filter(Boolean).length;
   $app.innerHTML = `<section class="panel result"><h2>복습 끝</h2>
-    <div class="kv"><div><b>${ok}/${run.list.length}</b><span>맞힘 (오답노트에서 지움)</span></div><div><b>+${run.xp}</b><span>XP</span></div><div><b>${S.wrong.length}</b><span>남은 오답</span></div></div>
+    <div class="kv"><div><b>${ok}/${run.list.length}</b><span>맞힘 (오답노트에서 지움)</span></div><div><b>${run.hintsUsed}</b><span>힌트 사용</span></div><div><b>+${run.xp}</b><span>XP</span></div><div><b>${S.wrong.length}</b><span>남은 오답</span></div></div>
     <div class="center"><button class="btn primary" id="home">맵으로 (Enter)</button>${S.wrong.length?`<button class="btn" id="again">남은 오답 다시</button>`:""}</div></section>`;
   document.getElementById("home").onclick = home; document.getElementById("home").focus();
   const a=document.getElementById("again"); if(a) a.onclick = startReview;
 }
 
-/* 키보드: 1~4로 객관식, Enter로 진행 */
+/* 키보드: 1~4로 객관식, H로 다음 힌트, Enter로 진행 */
 document.addEventListener("keydown", e=>{
   if(!run || e.target.tagName==="INPUT") return;
+  if((e.key==="h"||e.key==="H"||e.key==="ㅗ") && !e.metaKey && !e.ctrlKey){ const b=document.getElementById("hbtn"); if(b && !b.disabled){ e.preventDefault(); b.click(); } return; }
   const q = run.list && run.list[run.qi] && run.list[run.qi].q;
   if(q && q.t==="mcq" && /^[1-4]$/.test(e.key)){ const b=$app.querySelector(`.opt[data-k="${+e.key-1}"]`); if(b && !b.disabled) b.click(); }
 });
